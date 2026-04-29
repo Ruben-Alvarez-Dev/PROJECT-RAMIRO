@@ -31,7 +31,24 @@
 | Unit tests (5 suites) | ✅ | `5a4bde9` |
 | GitHub Actions CI | ✅ | `5a4bde9` |
 
-**Total: 22 commits, ~5,900 LOC, complete hexagonal architecture scaffold.**
+**Total: 23 commits, ~7,200 LOC, complete hexagonal architecture scaffold + audio pipeline.**
+
+---
+
+## Phase 2 — Video Pipeline ✅ COMPLETE
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Frame sampler (1-4 sources, ring buffer) | ✅ | `7b49f88` |
+| Dual model processor (OMNI+PRO parallel) | ✅ | `7b49f88` |
+| Merge strategies (4 modes) | ✅ | `7b49f88` |
+| Video pipeline service (full orchestration) | ✅ | `7b49f88` |
+| VideoGrid component (1-4 sources) | ✅ | `7b49f88` |
+| ContextMeter with TIER visualization | ✅ | `7b49f88` |
+| Unit tests: FrameSampler (7 tests) | ✅ | `7b49f88` |
+| Unit tests: DualModelProcessor (8 tests) | ✅ | `7b49f88` |
+
+**Target:** 4 simultaneous video sources, no frame drops.
 
 ---
 
