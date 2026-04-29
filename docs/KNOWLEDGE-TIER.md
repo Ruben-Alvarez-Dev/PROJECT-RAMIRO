@@ -1,166 +1,207 @@
 # Knowledge TIER System
 
+**Last updated:** 2026-04-29  
+**Status:** CORRECTED — Aligned with Jart-OS TIER-08 canonical architecture
+
 ---
 
 ## Overview
 
-The TIER system manages knowledge with strict priority levels. Higher TIERs are sacred — they are never evicted, never summarized without explicit approval, and always available to the LLM context.
+The Knowledge TIER system lives inside **Jart-OS TIER-08 (KNOWLEDGE)**. It is NOT a standalone system — it is the knowledge layer of the entire agentic operating system.
 
-## TIER 0 — Sacred Word (Palabra Santa)
+Ramiro's knowledge management follows a strict hierarchy. Higher TIERs are more reliable and harder to evict. The system is designed for **long study sessions** (1-2 hours) with **auto-cleanup** and **focus anchoring** on the current topic.
 
-**Immutable. Non-negotiable. Always in context.**
+---
+
+## TIER 0 — Sacred Word (Palabra Santa) — CORRECTED
+
+**What it IS:** Infrastructure monitoring. The "point of contact" that Jart-OS uses to know "what the clouds smell like."
 
 | Property | Value |
 |----------|-------|
-| Max Size | Configurable (default: 200K tokens) |
+| Purpose | Monitor infrastructure state, ports, drivers, LLM engines, proxies |
 | Eviction | NEVER |
-| Modification | Manual only, version-controlled |
-| Examples | Oposition syllabus, legal texts, exam criteria |
-| Storage | File system + Qdrant (immutable index) |
-| Refresh | Only via explicit `update-tier0` command |
+| Examples | GPU health, LLM provider status, NATS connection, Redis health |
+| Where | Jart-OS TIER-00 (Metal) + TIER-09 (Control) |
+| NOT | Syllabus, documents, study materials |
 
-```
-knowledge/
-├── tier-0/
-│   ├── opositions/
-│   │   ├── temario-completo.md
-│   │   ├── criterios-evaluacion.md
-│   │   └── legislacion-vigente.md
-│   └── config.yaml
-```
+### What TIER 0 monitors:
+- LLM engine availability (MiMo, Qwen, OpenAI)
+- API endpoint health (latency, error rate)
+- NATS/Redis connection status
+- GPU/memory utilization
+- Proxy routing state (LiteLLM)
 
-### Rules
-1. TIER 0 content is ALWAYS included in the system prompt
-2. TIER 0 is NEVER summarized or compressed
-3. TIER 0 changes require version bump + commit
-4. TIER 0 takes priority over all other TIERs when context is limited
+### Where does the opposition syllabus go?
 
-## TIER 1 — Core Knowledge
+The syllabus goes in **TIER 1** as indexed knowledge, NOT in TIER 0. TIER 0 is for infrastructure awareness, not content.
 
-**Indexed. Searchable. Retrieved on demand.**
+---
+
+## TIER 1 — Core Knowledge (Indexed + Retrieved)
+
+**Indexed. Searchable. Retrieved on demand via semantic search.**
 
 | Property | Value |
 |----------|-------|
-| Max Size | Unlimited (indexed) |
-| Retrieval | Semantic search via Qdrant |
-| Examples | Documentation, reference materials, study notes |
+| Max Size | Unlimited (indexed in Qdrant) |
+| Retrieval | Semantic search via vector similarity |
+| Examples | Opposition syllabus, study notes, legal texts, exam criteria |
 | Storage | Qdrant vectors + file system |
-| Refresh | Automatic from MCP servers |
+| Refresh | Automatic from RAG pipeline (Jart-OS TIER-06 pipe-rag) |
 
+### What lives here:
+- **Opposition syllabus** — the full temario, chunked and indexed
+- **Study materials** — notes, summaries, practice exams
+- **Legal/regulatory texts** — current legislation
+- **Reference documents** — criteria, evaluation rubrics
+
+### RAG Pipeline (Jart-OS TIER-06):
 ```
-knowledge/
-├── tier-1/
-│   ├── documents/          # Raw source documents
-│   ├── index/              # Qdrant collection metadata
-│   └── collections.yaml    # Collection definitions
+User drops PDF → TIER-06 (pipe-rag)
+  → Text extraction
+  → Chunking (512 tokens, 64 overlap)
+  → Embedding generation
+  → Qdrant indexing (TIER-08)
+  → Available for semantic search
 ```
 
-### Rules
-1. All TIER 1 content is indexed on ingestion
-2. Retrieved via semantic search when relevant to conversation
-3. Auto-chunked with configurable overlap (default: 512 tokens, 64 overlap)
-4. Metadata preserved: source, date, category, relevance score
+---
 
-## TIER 2 — Dynamic Context
+## TIER 2 — Dynamic Context (Session-scoped, Auto-summarized)
 
 **Session-scoped. Auto-summarized. Progressively compressed.**
 
 | Property | Value |
 |----------|-------|
-| Max Size | Configurable (default: 50% of context window) |
+| Max Size | Configurable (default: 35% of context window) |
 | Lifecycle | Born → Active → Summarized → Archived |
 | Examples | Conversation history, tool results, intermediate reasoning |
-| Storage | SQLite (session) + memory cache |
+| Storage | In-memory during session, SQLite for persistence |
 | Compression | Auto-summarization when >80% capacity |
 
-### Compression Strategy
-```
-Full Detail (last 10 messages)
-    │
-    ▼
-Summary (messages 11-50)
-    │
-    ▼
-Key Points Only (messages 51+)
-    │
-    ▼
-Archived (accessible via explicit recall)
-```
+### Compression Strategy (from Claude Code analysis):
 
-### Rules
-1. Last N messages always in full detail (configurable, default: 10)
-2. Older messages progressively summarized
-3. Key decisions and facts preserved as bullet points
-4. Archive accessible via `chatrecall` MCP tool
+**Layer 1 — Snip old tool results:**
+For messages older than the last 6 turns:
+- Keep first half of content
+- Keep last quarter of content
+- Replace middle with `[... N chars snipped ...]`
 
-## TIER 3 — Ephemeral
+**Layer 2 — Auto-compact:**
+When context exceeds 70% of window:
+1. Walk backwards from end, accumulate tokens
+2. Find split point at 30% keep ratio
+3. Summarize old portion via LLM call
+4. Replace with: `[Previous conversation summary] + recent messages`
 
-**Current turn only. Not persisted.**
+### Focus Anchoring:
+When the conversation has a clear topic (e.g., "Constitución Española"), the system:
+1. Tracks the current topic via entity extraction
+2. Boosts relevance scores for documents matching the topic
+3. Deprioritizes unrelated TIER 1 results
+
+---
+
+## TIER 3 — Ephemeral (Current turn only)
+
+**Not persisted. Not summarized. Discarded after use.**
 
 | Property | Value |
 |----------|-------|
-| Max Size | Remaining context window |
+| Max Size | 10% of context window |
 | Lifecycle | Single turn |
-| Examples | Current video frames, audio buffer, tool call results |
+| Examples | Current user message, immediate tool results |
 | Storage | In-memory only |
 
-### Rules
-1. Discarded after each response cycle
-2. Never persisted to storage
-3. Can be larger than other TIERs (uses available space)
-4. Frame samples from video streams live here
+---
 
 ## Context Assembly Algorithm
 
+```typescript
+function assembleContext(config, currentMessage, history, windowSize) {
+  const budget = {
+    tier0: windowSize * 0.30,  // Infrastructure status (30%)
+    tier1: windowSize * 0.25,  // Knowledge retrieval (25%)
+    tier2: windowSize * 0.35,  // Conversation history (35%)
+    tier3: windowSize * 0.10,  // Current message (10%)
+  };
+
+  // TIER 0 — Infrastructure status
+  const infraStatus = await getInfrastructureStatus();
+  // LLM health, NATS status, GPU utilization
+
+  // TIER 1 — Knowledge retrieval
+  const relevantDocs = await qdrant.search(currentMessage, 5);
+  // Semantic search across indexed syllabus and documents
+
+  // TIER 2 — Conversation history (progressive compression)
+  const compressedHistory = compressHistory(history, budget.tier2);
+  // Layer 1: Snip old tool results
+  // Layer 2: Auto-compact if >70% capacity
+
+  // TIER 3 — Current message
+  const currentContext = currentMessage;
+
+  return [infraStatus, relevantDocs, compressedHistory, currentContext].join('\n\n---\n\n');
+}
 ```
-function assembleContext(window_size, tiers):
-    remaining = window_size
-    context = []
 
-    # 1. TIER 0 — Always included, never cut
-    tier0 = compress_if_needed(tiers[0], remaining * 0.3)
-    context.append(tier0)
-    remaining -= tier0.size
-
-    # 2. TIER 3 — Current ephemeral data
-    tier3 = tiers[3]  # already sized to fit
-    context.append(tier3)
-    remaining -= tier3.size
-
-    # 3. TIER 2 — Dynamic conversation context
-    tier2 = tiers[2]
-    if tier2.size > remaining * 0.7:
-        tier2 = auto_summarize(tier2, remaining * 0.7)
-    context.append(tier2)
-    remaining -= tier2.size
-
-    # 4. TIER 1 — Retrieved knowledge (fill remaining space)
-    tier1 = retrieve_relevant(tiers[1], query, remaining)
-    context.append(tier1)
-
-    return context
-```
+---
 
 ## Auto-Cleanup Triggers
 
-| Trigger | Action | Threshold |
-|---------|--------|-----------|
-| Context >80% | Summarize TIER 2 oldest messages | Automatic |
-| Context >90% | Aggressive TIER 2 compression | Automatic |
-| Context >95% | Drop TIER 3 low-priority frames | Automatic |
-| Session >1h | Archive TIER 2 to long-term memory | Automatic |
-| Explicit | `memory cleanup` command | Manual |
+| Threshold | Action |
+|-----------|--------|
+| 60% context used | No action |
+| 70% context used | Layer 1: Snip old tool results |
+| 80% context used | Layer 2: Auto-compact (summarize old messages) |
+| 90% context used | Aggressive: Archive session, start fresh |
+| 95% context used | Emergency: Force session restart |
 
-## Focus Anchoring
+---
 
-The system maintains conversational focus by tracking:
-1. **Thread Topic**: Current subject of discussion
-2. **Active Documents**: Which TIER 0/1 docs are being referenced
-3. **User Intent**: What the user is trying to accomplish
-4. **Session Goals**: Declared or inferred objectives
+## Memory Persistence (Claude Code Pattern + Agent-Memory)
 
-When context pressure occurs, the system preserves:
-- Thread topic (always)
-- Active TIER 0 references (always)
-- Last 3 user messages (always)
-- Current action/tool chain (always)
+### File-based Memory (Claude Code pattern):
+```
+~/.ramiro/memory/
+  ├── MEMORY.md                 ← Index (auto-rebuilt, max 200 lines / 25KB)
+  ├── user_prefers_concise.md   ← Entry with YAML frontmatter
+  └── study_progress.md
+
+.ramiro/memory/                 ← Project-scoped
+  ├── MEMORY.md
+  └── session_notes.md
+```
+
+Each entry:
+```yaml
+---
+name: user_prefers_concise
+description: User wants direct, concise responses
+type: user
+created: 2026-04-29
+confidence: 0.90
+source: consolidator
+last_used_at: 2026-04-29
+conflict_group: writing_style
+---
+[Cuerpo de la memoria]
+```
+
+### SQLite-based Memory (Agent-Memory pattern):
+- FTS5 full-text search for fast recall
+- Confidence scoring (user = 1.0, consolidator = 0.8)
+- Stagnation detection (3 failed attempts → truncate history)
+- Session consolidation (max 3 memories extracted per session)
+
+### Which to use when:
+
+| Scenario | System |
+|----------|--------|
+| Quick keyword lookup | SQLite FTS5 |
+| Semantic search | Qdrant vectors |
+| System prompt injection | MEMORY.md (file-based) |
+| Session archiving | SQLite + MEMORY.md |
+| Between-session persistence | Goose Memory.rememberMemory |
