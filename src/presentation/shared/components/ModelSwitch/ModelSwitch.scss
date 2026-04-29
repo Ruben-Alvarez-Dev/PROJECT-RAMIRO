@@ -1,0 +1,78 @@
+@import '../../styles/tokens';
+
+.ramiro-model-switch {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-1;
+  background: $color-surface-hover;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+
+  &__option {
+    padding: $space-1 $space-3;
+    font-size: $font-size-xs;
+    font-family: $font-mono;
+    font-weight: 500;
+    color: $text-tertiary;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: all $transition-fast;
+    user-select: none;
+    white-space: nowrap;
+    border: none;
+    background: transparent;
+
+    &:hover {
+      color: $text-secondary;
+      background: rgba($accent-primary, 0.05);
+    }
+
+    &--active {
+      color: $text-primary;
+      background: $accent-primary;
+      box-shadow: $glow-primary;
+
+      &:hover {
+        background: darken($accent-primary, 5%);
+      }
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: $text-tertiary;
+    margin-right: $space-1;
+    white-space: nowrap;
+  }
+
+  &__separator {
+    width: 1px;
+    height: 16px;
+    background: $color-border;
+    margin: 0 $space-1;
+  }
+
+  &__indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: $radius-full;
+    margin-right: $space-1;
+
+    &--omni {
+      background: $accent-secondary;
+    }
+
+    &--pro {
+      background: $accent-primary;
+    }
+
+    &--both {
+      background: linear-gradient(135deg, $accent-secondary, $accent-primary);
+    }
+
+    &--auto {
+      background: $accent-warning;
+    }
+  }
+}

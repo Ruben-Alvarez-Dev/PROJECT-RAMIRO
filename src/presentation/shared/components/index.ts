@@ -4,3 +4,4 @@ export * from './AudioWaveform';
 export * from './ControlBar';
 export * from './VideoGrid';
 export * from './ContextMeter';
+export * from './ModelSwitch';

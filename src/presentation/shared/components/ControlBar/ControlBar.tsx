@@ -1,7 +1,7 @@
-// src/presentation/shared/components/ControlBar/ControlBar.tsx
 import React from 'react';
 import { Button } from '../Button';
 import { AudioWaveform } from '../AudioWaveform';
+import { ModelSwitch, type ModelMode } from '../ModelSwitch';
 import type { AudioPipelineState } from '@application/services/audio/audio-pipeline.service';
 import './ControlBar.scss';
 
@@ -9,11 +9,12 @@ export interface ControlBarProps {
   pipelineState: AudioPipelineState;
   isSessionActive: boolean;
   latencyMs: number;
+  modelMode: ModelMode;
   onStartVoice: () => void;
   onStartVideo: () => void;
   onStop: () => void;
   onMicToggle: () => void;
-  onModelChange?: (model: string) => void;
+  onModelModeChange: (mode: ModelMode) => void;
   className?: string;
 }
 
@@ -30,11 +31,12 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   pipelineState,
   isSessionActive,
   latencyMs,
+  modelMode,
   onStartVoice,
   onStartVideo,
   onStop,
   onMicToggle,
-  onModelChange,
+  onModelModeChange,
   className = '',
 }) => {
   const latencyClass = latencyMs < 200 ? 'good' : latencyMs < 500 ? 'ok' : 'bad';
@@ -59,6 +61,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
               {pipelineState.status === 'listening' ? '🔴' : '🎤'}
             </button>
             <AudioWaveform isActive={pipelineState.status === 'listening' || pipelineState.status === 'speaking'} />
+            <ModelSwitch value={modelMode} onChange={onModelModeChange} />
             <Button variant="ghost" size="sm" onClick={onStop}>
               ⏹ Stop
             </Button>
@@ -67,6 +70,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
           <>
             <Button variant="primary" onClick={onStartVoice}>🎤 Voice</Button>
             <Button variant="secondary" onClick={onStartVideo}>📹 Video</Button>
+            <ModelSwitch value={modelMode} onChange={onModelModeChange} />
           </>
         )}
       </div>
@@ -77,15 +81,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
             {Math.round(latencyMs)}ms
           </span>
         )}
-        <select
-          className="ramiro-control-bar__model-select"
-          onChange={(e) => onModelChange?.(e.target.value)}
-        >
-          <option value="mimo-v2.5-pro">MiMo V2.5 Pro</option>
-          <option value="mimo-v2-omni">MiMo V2 Omni</option>
-          <option value="qwen2.5-omni">Qwen 2.5 Omni</option>
-          <option value="gpt-4o">GPT-4o</option>
-        </select>
       </div>
     </header>
   );

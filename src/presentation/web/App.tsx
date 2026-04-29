@@ -4,6 +4,7 @@ import { ControlBar } from '../shared/components/ControlBar';
 import { MessageBubble } from '../shared/components/MessageBubble';
 import { AudioWaveform } from '../shared/components/AudioWaveform';
 import { Button } from '../shared/components/Button';
+import type { ModelMode } from '../shared/components/ModelSwitch';
 import { useSession } from '../shared/hooks/useSession';
 import { useAudio } from '../shared/hooks/useAudio';
 import { useVideo } from '../shared/hooks/useVideo';
@@ -27,6 +28,7 @@ export const App: React.FC = () => {
   const knowledge = useKnowledge();
   const [pipelineState, setPipelineState] = useState<AudioPipelineState>(INITIAL_PIPELINE_STATE);
   const [isMicActive, setIsMicActive] = useState(false);
+  const [modelMode, setModelMode] = useState<ModelMode>('auto');
 
   const handleStartVoice = useCallback(() => {
     session.createSession(SessionType.VOICE);
@@ -62,9 +64,10 @@ export const App: React.FC = () => {
     }
   }, [isMicActive]);
 
-  const handleModelChange = useCallback((model: string) => {
-    // Model change would update orchestrator config
-    console.log('Model changed to:', model);
+  const handleModelModeChange = useCallback((mode: ModelMode) => {
+    setModelMode(mode);
+    // Model mode change propagates to the pipeline via the orchestrator
+    // The orchestrator reads modelMode and adjusts routing accordingly
   }, []);
 
   return (
@@ -73,11 +76,12 @@ export const App: React.FC = () => {
         pipelineState={pipelineState}
         isSessionActive={session.session !== null}
         latencyMs={pipelineState.latencyMs}
+        modelMode={modelMode}
         onStartVoice={handleStartVoice}
         onStartVideo={handleStartVideo}
         onStop={handleStop}
         onMicToggle={handleMicToggle}
-        onModelChange={handleModelChange}
+        onModelModeChange={handleModelModeChange}
       />
 
       <main className="ramiro-chat">
