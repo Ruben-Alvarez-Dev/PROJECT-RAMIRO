@@ -1,73 +1,85 @@
 // src/presentation/web/App.tsx
-import React from 'react';
-import { Button, MessageBubble } from '../shared/components';
+import React, { useState, useCallback } from 'react';
+import { ControlBar } from '../shared/components/ControlBar';
+import { MessageBubble } from '../shared/components/MessageBubble';
+import { AudioWaveform } from '../shared/components/AudioWaveform';
+import { Button } from '../shared/components/Button';
 import { useSession } from '../shared/hooks/useSession';
 import { useAudio } from '../shared/hooks/useAudio';
 import { useVideo } from '../shared/hooks/useVideo';
 import { useKnowledge } from '../shared/hooks/useKnowledge';
 import { SessionType, MessageRole, SessionState } from '@core/domain/enums';
+import type { AudioPipelineState } from '@application/services/audio/audio-pipeline.service';
 import '../shared/styles/reset.scss';
+import '../shared/styles/layout.scss';
+
+const INITIAL_PIPELINE_STATE: AudioPipelineState = {
+  status: 'idle',
+  currentTranscript: '',
+  lastResponse: '',
+  latencyMs: 0,
+};
 
 export const App: React.FC = () => {
   const session = useSession();
   const audio = useAudio();
   const video = useVideo();
   const knowledge = useKnowledge();
+  const [pipelineState, setPipelineState] = useState<AudioPipelineState>(INITIAL_PIPELINE_STATE);
+  const [isMicActive, setIsMicActive] = useState(false);
 
-  const handleStartVoice = () => {
+  const handleStartVoice = useCallback(() => {
     session.createSession(SessionType.VOICE);
     session.updateState(SessionState.CONNECTING);
     audio.startCapture();
     session.updateState(SessionState.ACTIVE);
-  };
+    setPipelineState(prev => ({ ...prev, status: 'capturing' }));
+  }, [session, audio]);
 
-  const handleStartVideo = () => {
+  const handleStartVideo = useCallback(() => {
     session.createSession(SessionType.VIDEO);
     session.updateState(SessionState.CONNECTING);
     video.startCamera();
     session.updateState(SessionState.ACTIVE);
-  };
+    setPipelineState(prev => ({ ...prev, status: 'capturing' }));
+  }, [session, video]);
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
     audio.stopCapture();
     video.stopAll();
     session.updateState(SessionState.IDLE);
-  };
+    setPipelineState(INITIAL_PIPELINE_STATE);
+    setIsMicActive(false);
+  }, [audio, video, session]);
+
+  const handleMicToggle = useCallback(() => {
+    if (isMicActive) {
+      setIsMicActive(false);
+      setPipelineState(prev => ({ ...prev, status: 'capturing' }));
+    } else {
+      setIsMicActive(true);
+      setPipelineState(prev => ({ ...prev, status: 'listening' }));
+    }
+  }, [isMicActive]);
+
+  const handleModelChange = useCallback((model: string) => {
+    // Model change would update orchestrator config
+    console.log('Model changed to:', model);
+  }, []);
 
   return (
     <div className="ramiro-layout">
-      {/* Control Bar */}
-      <header className="ramiro-control-bar">
-        <div className="ramiro-control-bar__left">
-          <h1 className="ramiro-control-bar__title">Ramiro</h1>
-          <span className="ramiro-control-bar__status" data-state={session.session?.state}>
-            {session.session?.state || 'idle'}
-          </span>
-        </div>
-        <div className="ramiro-control-bar__center">
-          {!session.session ? (
-            <>
-              <Button variant="primary" onClick={handleStartVoice}>
-                🎤 Start Voice
-              </Button>
-              <Button variant="secondary" onClick={handleStartVideo}>
-                📹 Start Video
-              </Button>
-            </>
-          ) : (
-            <Button variant="ghost" onClick={handleStop}>
-              ⏹ Stop
-            </Button>
-          )}
-        </div>
-        <div className="ramiro-control-bar__right">
-          <span className="ramiro-context-meter">
-            Context: {session.messages.length} messages
-          </span>
-        </div>
-      </header>
+      <ControlBar
+        pipelineState={pipelineState}
+        isSessionActive={session.session !== null}
+        latencyMs={pipelineState.latencyMs}
+        onStartVoice={handleStartVoice}
+        onStartVideo={handleStartVideo}
+        onStop={handleStop}
+        onMicToggle={handleMicToggle}
+        onModelChange={handleModelChange}
+      />
 
-      {/* Main Content Area */}
       <main className="ramiro-chat">
         {/* Video Grid */}
         {video.isStreaming && (
@@ -90,24 +102,41 @@ export const App: React.FC = () => {
 
         {/* Messages */}
         <div className="ramiro-chat__messages">
+          {session.messages.length === 0 && !session.session && (
+            <div className="ramiro-chat__empty">
+              <h2>🎤 Start a conversation</h2>
+              <p>Press Voice or Video to begin a realtime session with Ramiro.</p>
+            </div>
+          )}
+          {session.messages.length === 0 && session.session && (
+            <div className="ramiro-chat__empty">
+              <AudioWaveform isActive={pipelineState.status === 'listening'} barCount={32} />
+              <p>{pipelineState.status === 'listening' ? 'Listening...' : 'Press the mic button to speak.'}</p>
+            </div>
+          )}
           {session.messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} />
           ))}
-          {session.isProcessing && (
+          {pipelineState.status === 'processing' && (
             <div className="ramiro-chat__typing">
               <span className="ramiro-spinner" />
               Thinking...
+            </div>
+          )}
+          {pipelineState.status === 'speaking' && (
+            <div className="ramiro-chat__speaking">
+              <AudioWaveform isActive={true} barCount={16} />
+              <span>Speaking...</span>
             </div>
           )}
         </div>
 
         {/* Input Area */}
         <div className="ramiro-chat__input-area">
-          {audio.isCapturing && (
-            <div className="ramiro-waveform">
-              <span className="ramiro-stream-indicator" data-active="true">
-                🔴 Listening...
-              </span>
+          {pipelineState.currentTranscript && (
+            <div className="ramiro-chat__transcript">
+              <span className="ramiro-chat__transcript-label">You said:</span>
+              <span className="ramiro-chat__transcript-text">{pipelineState.currentTranscript}</span>
             </div>
           )}
           <input
@@ -149,6 +178,11 @@ export const App: React.FC = () => {
               </span>
             </div>
           ))}
+          {knowledge.results.length === 0 && !knowledge.isSearching && (
+            <div className="ramiro-knowledge__empty">
+              <p>Search your knowledge base for oposition materials, documentation, and references.</p>
+            </div>
+          )}
         </div>
       </aside>
     </div>

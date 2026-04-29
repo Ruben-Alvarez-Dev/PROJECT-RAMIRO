@@ -58,10 +58,16 @@ export const SERVICE_KEYS = {
   LLM_OMNI: 'ILLMPort.omni',
   LLM_PRO: 'ILLMPort.pro',
   LLM_FALLBACK: 'ILLMPort.fallback',
-  STT: 'ISTTPort',
-  TTS: 'ITTSPort',
+  STT_PRIMARY: 'ISTTPort.primary',
+  STT_FALLBACK: 'ISTTPort.fallback',
+  TTS_PRIMARY: 'ITTSPort.primary',
+  TTS_FALLBACK: 'ITTSPort.fallback',
   STORAGE: 'IStoragePort',
   VECTOR: 'IVectorPort',
+
+  // Audio Pipeline
+  AUDIO_PIPELINE: 'AudioPipelineService',
+  VAD_PROCESSOR: 'VADProcessor',
 
   // Ports — Notification
   EVENT_BUS: 'IEventBus',

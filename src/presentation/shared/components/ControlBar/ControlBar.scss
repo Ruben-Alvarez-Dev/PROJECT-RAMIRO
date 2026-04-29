@@ -1,0 +1,144 @@
+// src/presentation/shared/components/ControlBar/ControlBar.scss
+
+@import '../../styles/tokens';
+
+.ramiro-control-bar {
+  grid-area: control-bar;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $space-4;
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+  height: 56px;
+  z-index: 10;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__logo {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    background: linear-gradient(135deg, $accent-primary, $accent-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    user-select: none;
+  }
+
+  &__status {
+    font-size: $font-size-xs;
+    color: $text-tertiary;
+    padding: $space-1 $space-2;
+    border-radius: $radius-full;
+    background: $color-surface-hover;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: $font-mono;
+
+    &[data-state="active"] {
+      color: $accent-success;
+      background: rgba($accent-success, 0.1);
+    }
+
+    &[data-state="listening"] {
+      color: $accent-secondary;
+      background: rgba($accent-secondary, 0.1);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    &[data-state="processing"] {
+      color: $accent-warning;
+      background: rgba($accent-warning, 0.1);
+    }
+
+    &[data-state="speaking"] {
+      color: $accent-primary;
+      background: rgba($accent-primary, 0.1);
+    }
+
+    &[data-state="error"] {
+      color: $accent-error;
+      background: rgba($accent-error, 0.1);
+    }
+  }
+
+  &__center {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__model-select {
+    background: $color-surface-hover;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    color: $text-secondary;
+    font-size: $font-size-xs;
+    font-family: $font-mono;
+    padding: $space-1 $space-2;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $color-border-active;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $accent-primary;
+    }
+  }
+
+  &__mic-button {
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all $transition-fast;
+    cursor: pointer;
+    border: none;
+
+    &--idle {
+      background: $color-surface-hover;
+      color: $text-secondary;
+
+      &:hover {
+        background: rgba($accent-primary, 0.15);
+        color: $accent-primary;
+      }
+    }
+
+    &--active {
+      background: $accent-error;
+      color: white;
+      box-shadow: 0 0 16px rgba($accent-error, 0.4);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  &__latency {
+    font-size: $font-size-xs;
+    color: $text-tertiary;
+    font-family: $font-mono;
+
+    &--good { color: $accent-success; }
+    &--ok { color: $accent-warning; }
+    &--bad { color: $accent-error; }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

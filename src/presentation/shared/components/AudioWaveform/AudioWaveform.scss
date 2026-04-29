@@ -1,0 +1,37 @@
+// src/presentation/shared/components/AudioWaveform/AudioWaveform.scss
+
+@import '../../styles/tokens';
+
+.ramiro-waveform {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 0;
+
+  &__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 32px;
+  }
+
+  &__bar {
+    width: 3px;
+    background: $accent-primary;
+    border-radius: $radius-sm;
+    transition: height 60ms ease;
+    opacity: 0.6;
+
+    &--active {
+      opacity: 1;
+      background: linear-gradient(180deg, $accent-primary, $accent-secondary);
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: $text-tertiary;
+    font-family: $font-mono;
+    min-width: 60px;
+  }
+}
