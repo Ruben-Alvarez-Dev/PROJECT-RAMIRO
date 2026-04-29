@@ -1,163 +1,145 @@
 # Roadmap
 
-**Last Updated:** 2026-04-29
+**Last updated:** 2026-04-29
 
 ---
 
-## Phase 0 — Foundation (Week 1)
+## Phase 0 — Foundation ✅ COMPLETE
 
-**Goal:** Project scaffolding, core domain, port interfaces.
+| Task | Status | Commit |
+|------|--------|--------|
+| Git init + .gitignore | ✅ | `3ddb6d5` |
+| README.md | ✅ | `0e46d94` |
+| PRD | ✅ | `e10fee4` |
+| Architecture spec | ✅ | `a4b867d` |
+| Tech stack | ✅ | `39bebf6` |
+| Knowledge TIER system | ✅ | `352f6bb` |
+| Design system (BEM) | ✅ | `cf85231` |
+| Git workflow | ✅ | `8c984c9` |
+| Testing strategy | ✅ | `0365a55` |
+| Port interfaces | ✅ | `8fc00e3` |
+| Entity definitions | ✅ | `fc707a7` |
+| Tooling (package.json, tsconfig, vite, vitest, biome) | ✅ | `0d0dd63` |
+| Domain enums | ✅ | `28e98d8` |
+| Value objects | ✅ | `49201b8` |
+| Domain types | ✅ | `bda41a9` |
+| Port interfaces (code) | ✅ | `20b7ab7` |
+| Application use cases + services + DTOs | ✅ | `1ce9134` |
+| Shared (DI, errors, logger, config, constants) | ✅ | `6ba9521` |
+| Presentation (components, hooks, SCSS, web App) | ✅ | `240638d` |
+| Infrastructure adapters + factory | ✅ | `5a4bde9` |
+| Unit tests (5 suites) | ✅ | `5a4bde9` |
+| GitHub Actions CI | ✅ | `5a4bde9` |
 
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 0.1 | Repository setup, CI, linting, commit hooks | 🔲 | — |
-| 0.2 | Core domain entities (Session, Message, StreamSource, KnowledgeEntry) | 🔲 | — |
-| 0.3 | Value objects (AudioConfig, VideoConfig, ModelConfig, TierLevel) | 🔲 | — |
-| 0.4 | Port interfaces (IAudioPort, IVideoPort, ILLMPort, IStoragePort, IKnowledgePort) | 🔲 | — |
-| 0.5 | Domain events (AudioFrameReceived, ResponseGenerated, SessionStateChanged) | 🔲 | — |
-| 0.6 | DI container setup | 🔲 | — |
-| 0.7 | Shared error hierarchy | 🔲 | — |
-| 0.8 | Configuration system (AppConfig, environment overrides) | 🔲 | — |
-| 0.9 | Tauri v2 project scaffold (React 19 + Vite 6) | 🔲 | — |
-| 0.10 | BEM design system foundation (tokens, variables, reset) | 🔲 | — |
-
-**Deliverable:** Compilable project with empty ports, working CI, design tokens.
-
----
-
-## Phase 1 — Audio Pipeline (Weeks 2-3)
-
-**Goal:** Working voice conversation end-to-end.
-
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 1.1 | LiveKit audio adapter (WebRTC capture + playback) | 🔲 | — |
-| 1.2 | Silero VAD adapter (ONNX, speech detection) | 🔲 | — |
-| 1.3 | MiMo V2 Omni audio streaming adapter | 🔲 | — |
-| 1.4 | MiMo V2 TTS adapter (streaming synthesis) | 🔲 | — |
-| 1.5 | Deepgram STT fallback adapter | 🔲 | — |
-| 1.6 | WhisperKit native macOS STT adapter | 🔲 | — |
-| 1.7 | AudioPipelineService (capture → VAD → STT → LLM → TTS → playback) | 🔲 | — |
-| 1.8 | OrchestratorService v1 (single model, single source) | 🔲 | — |
-| 1.9 | AudioWaveform component (BEM: `.ramiro-waveform`) | 🔲 | — |
-| 1.10 | ControlBar component (BEM: `.ramiro-control-bar`) | 🔲 | — |
-| 1.11 | StreamIndicator component (BEM: `.ramiro-stream-indicator`) | 🔲 | — |
-| 1.12 | VoiceSession page layout (BEM: `.ramiro-page--voice`) | 🔲 | — |
-| 1.13 | Audio latency benchmark (<200ms target) | 🔲 | — |
-
-**Deliverable:** Working voice conversation with MiMo Omni. Speak → hear response.
+**Total: 21 commits, ~4,200 LOC, complete hexagonal architecture scaffold.**
 
 ---
 
-## Phase 2 — Video Pipeline (Weeks 4-5)
+## Phase 1 — Audio Pipeline 🚧 NEXT
 
-**Goal:** Multi-source video with simultaneous OMNI + PRO processing.
+| Task | Priority | Est. LOC |
+|------|----------|----------|
+| WhisperKit STT adapter (Swift native) | P0 | 300 |
+| MiMo V2 TTS adapter (streaming) | P0 | 250 |
+| Deepgram STT adapter (fallback) | P1 | 200 |
+| Gemini TTS adapter (fallback) | P1 | 200 |
+| Silero VAD integration (ONNX) | P0 | 150 |
+| Audio pipeline service (full flow) | P0 | 400 |
+| Push-to-talk mode | P1 | 100 |
+| Always-on mode with VAD | P1 | 150 |
+| Audio waveform component | P1 | 200 |
+| Integration tests (mic → response) | P0 | 300 |
 
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 2.1 | LiveKit video adapter (camera capture) | 🔲 | — |
-| 2.2 | Screen capture adapter (macOS CGDisplay + window picker) | 🔲 | — |
-| 2.3 | Frame sampler (configurable FPS per source) | 🔲 | — |
-| 2.4 | Frame compositor (multi-source grid layout) | 🔲 | — |
-| 2.5 | OBS WebSocket adapter (scene management) | 🔲 | — |
-| 2.6 | OMNI multimodal adapter (video + audio simultaneous input) | 🔲 | — |
-| 2.7 | PRO reasoning adapter (structured analysis on selected frames) | 🔲 | — |
-| 2.8 | Response merger (OMNI + PRO → unified response) | 🔲 | — |
-| 2.9 | VideoPipelineService (up to 4 sources, streaming) | 🔲 | — |
-| 2.10 | OrchestratorService v2 (multi-model, multi-source routing) | 🔲 | — |
-| 2.11 | VideoGrid component (BEM: `.ramiro-video-grid`, 1-4 cells) | 🔲 | — |
-| 2.12 | VideoThumbnail component (BEM: `.ramiro-video-thumb`) | 🔲 | — |
-| 2.13 | Source picker (camera/screen/window selection) | 🔲 | — |
-| 2.14 | VideoSession page layout (BEM: `.ramiro-page--video`) | 🔲 | — |
-| 2.15 | Multi-source stress test (4 video + 4 audio, >1hr stable) | 🔲 | — |
-
-**Deliverable:** 4 video + 4 audio sources processing simultaneously. OMNI + PRO responding via TTS during stream.
+**Target:** <200ms end-to-end audio latency.
 
 ---
 
-## Phase 3 — Knowledge Foundation (Weeks 6-7)
+## Phase 2 — Video Pipeline
 
-**Goal:** Document-grounded conversations with TIER system.
+| Task | Priority | Est. LOC |
+|------|----------|----------|
+| Screen capture adapter (per-platform) | P0 | 300 |
+| Window capture adapter | P1 | 200 |
+| App capture adapter | P1 | 150 |
+| OBS WebSocket v5 integration | P1 | 300 |
+| Frame sampler (configurable FPS) | P0 | 150 |
+| Multi-source compositor | P0 | 250 |
+| OMNI + PRO parallel processor | P0 | 400 |
+| Response merger (text + audio) | P0 | 200 |
+| Video grid component (1-4 sources) | P0 | 350 |
+| Video controls (focus, PIP, reorder) | P1 | 200 |
+| Stress test (4 sources, 1hr) | P0 | 200 |
 
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 3.1 | Qdrant adapter (vector storage + semantic search) | 🔲 | — |
-| 3.2 | Document indexer (markdown, PDF, DOCX → chunks → embeddings) | 🔲 | — |
-| 3.3 | TIER 0 loader (sacred documents, immutable index) | 🔲 | — |
-| 3.4 | TIER 1 ingestion pipeline (MCP servers, file system, web) | 🔲 | — |
-| 3.5 | TIER 2 auto-summarization (progressive compression) | 🔲 | — |
-| 3.6 | Context assembly algorithm (TIER 0→3 priority) | 🔲 | — |
-| 3.7 | Focus anchoring (thread topic + active docs preservation) | 🔲 | — |
-| 3.8 | MemoryService (session + long-term + document memory) | 🔲 | — |
-| 3.9 | KnowledgeService (index, query, refresh) | 🔲 | — |
-| 3.10 | KnowledgePanel component (BEM: `.ramiro-knowledge`) | 🔲 | — |
-| 3.11 | SourceCard component (BEM: `.ramiro-source-card`) | 🔲 | — |
-| 3.12 | TierBadge component (BEM: `.ramiro-tier-badge`) | 🔲 | — |
-| 3.13 | ContextMeter component (BEM: `.ramiro-context-meter`) | 🔲 | — |
-| 3.14 | StudySession page layout (BEM: `.ramiro-page--study`) | 🔲 | — |
-| 3.15 | 2-hour session stability test (oposition materials) | 🔲 | — |
-
-**Deliverable:** Conversations grounded in TIER 0 documents. Auto-cleanup working. Context never exhausted in 2hr session.
+**Target:** 4 simultaneous video sources, no frame drops.
 
 ---
 
-## Phase 4 — Memory & MCP Integration (Week 8)
+## Phase 3 — Knowledge & Memory
 
-**Goal:** Persistent memory, Goose integration, MCP tools.
+| Task | Priority | Est. LOC |
+|------|----------|----------|
+| Qdrant integration (real, not mock) | P0 | 200 |
+| Document indexer (chunking + embedding) | P0 | 300 |
+| Semantic search with relevance scoring | P0 | 200 |
+| TIER 0 loader (immutable sacred docs) | P0 | 150 |
+| TIER 1 auto-index on ingestion | P1 | 200 |
+| TIER 2 progressive compression | P0 | 250 |
+| Auto-cleanup trigger (80/90/95% thresholds) | P0 | 200 |
+| Focus anchoring algorithm | P1 | 150 |
+| Session archiving (1hr+ sessions) | P1 | 200 |
+| Knowledge sidebar component | P1 | 300 |
+| Context meter visualization | P2 | 150 |
+| MCP server: ramiro-knowledge | P1 | 400 |
+| Long-session test (2hr, no leaks) | P0 | 200 |
 
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 4.1 | SQLite adapter (sessions, conversation history) | 🔲 | — |
-| 4.2 | Session management (create, resume, archive, delete) | 🔲 | — |
-| 4.3 | Auto-archiving (session >1h → long-term memory) | 🔲 | — |
-| 4.4 | MCP server registration (ramiro-knowledge, ramiro-session) | 🔲 | — |
-| 4.5 | Goose recipe: `realtime-voice` | 🔲 | — |
-| 4.6 | Goose recipe: `realtime-video` | 🔲 | — |
-| 4.7 | Goose recipe: `study-session` | 🔲 | — |
-| 4.8 | Goose profile: `ramiro` (multimodal agent) | 🔲 | — |
-| 4.9 | MCP-realtime-tech-docs integration test | 🔲 | — |
-| 4.10 | Memory recall across sessions | 🔲 | — |
-
-**Deliverable:** Full Goose integration. Persistent memory. MCP tools available.
-
----
-
-## Phase 5 — Cross-Platform & Polish (Weeks 9-10)
-
-**Goal:** Web + Android deployment, UX polish, performance.
-
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 5.1 | Web adapter (PWA, WebRTC fallbacks for non-Tauri) | 🔲 | — |
-| 5.2 | Responsive layout (768px → 1920px) | 🔲 | — |
-| 5.3 | Android Tauri v2 Mobile scaffold | 🔲 | — |
-| 5.4 | Kotlin audio/video adapters | 🔲 | — |
-| 5.5 | Dashboard page (session history, settings) | 🔲 | — |
-| 5.6 | Dark/light theme (data-attribute toggle) | 🔲 | — |
-| 5.7 | Animation polish (transitions, micro-interactions) | 🔲 | — |
-| 5.8 | Accessibility audit (WCAG 2.1 AA) | 🔲 | — |
-| 5.9 | Performance profiling (CPU, memory, latency) | 🔲 | — |
-| 5.10 | E2E tests (Playwright for web, XCTest for macOS) | 🔲 | — |
-| 5.11 | Documentation site (Docusaurus or similar) | 🔲 | — |
-| 5.12 | GitHub release v1.0.0 | 🔲 | — |
-
-**Deliverable:** Production-ready release. Web, macOS, Android.
+**Target:** 2-hour sessions, TIER 0 never evicted, auto-cleanup at 80%.
 
 ---
 
-## Phase 6 — Advanced Features (Weeks 11+)
+## Phase 4 — Platform & UX
 
-**Goal:** Power user features, extensibility.
+| Task | Priority | Est. LOC |
+|------|----------|----------|
+| Tauri v2 macOS app shell | P0 | 500 |
+| Swift native audio bridge | P0 | 400 |
+| Swift native video bridge | P0 | 300 |
+| macOS system permissions (mic, camera, screen) | P0 | 200 |
+| PWA manifest + service worker | P1 | 300 |
+| PWA install prompt | P2 | 100 |
+| Android Tauri v2 shell | P2 | 500 |
+| Kotlin audio/video adapters | P2 | 400 |
+| Network interruption recovery | P1 | 300 |
+| Cross-platform feature parity tests | P1 | 200 |
 
-| ID | Task | Status | Owner |
-|----|------|--------|-------|
-| 6.1 | Custom model providers (user-configurable API keys) | 🔲 | — |
-| 6.2 | Plugin system (custom adapters via MCP) | 🔲 | — |
-| 6.3 | Voice cloning (custom TTS voices) | 🔲 | — |
-| 6.4 | Realtime translation (multilingual sessions) | 🔲 | — |
-| 6.5 | Meeting mode (multiple human participants + AI) | 🔲 | — |
-| 6.6 | Presentation mode (AI co-presenter with slides) | 🔲 | — |
-| 6.7 | Export sessions (audio recording, transcript, summary) | 🔲 | — |
-| 6.8 | Community hub (share TIER 0 document packs) | 🔲 | — |
+---
 
-**Deliverable:** Feature-complete platform. Community ecosystem.
+## Phase 5 — Integration & Production
+
+| Task | Priority | Est. LOC |
+|------|----------|----------|
+| Goose MCP tool registration | P0 | 100 |
+| Goose recipe: realtime-voice | P0 | 50 |
+| Goose recipe: realtime-video | P0 | 50 |
+| Goose recipe: study-session | P1 | 50 |
+| OBS scene presets | P2 | 200 |
+| Caroline deployment (Hetzner relay) | P1 | 300 |
+| End-to-end smoke tests | P0 | 300 |
+| Performance benchmarks | P0 | 200 |
+| Documentation (user guide) | P1 | 500 |
+| Documentation (developer guide) | P1 | 400 |
+| README polish + badges | P2 | 100 |
+| Release v1.0.0 | P0 | — |
+
+---
+
+## Metrics Summary
+
+| Phase | Commits (est.) | LOC (est.) | Status |
+|-------|---------------|------------|--------|
+| Phase 0 — Foundation | 21 | ~4,200 | ✅ Complete |
+| Phase 1 — Audio | ~15 | ~2,200 | 🚧 Next |
+| Phase 2 — Video | ~12 | ~2,600 | 📋 Planned |
+| Phase 3 — Knowledge | ~13 | ~2,600 | 📋 Planned |
+| Phase 4 — Platform | ~10 | ~2,900 | 📋 Planned |
+| Phase 5 — Production | ~12 | ~2,250 | 📋 Planned |
+| **Total** | **~83** | **~16,750** | |
