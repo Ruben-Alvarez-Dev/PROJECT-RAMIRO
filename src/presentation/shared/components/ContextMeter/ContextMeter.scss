@@ -1,0 +1,96 @@
+@import '../../styles/tokens';
+
+.ramiro-context-meter {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-1 $space-2;
+  border-radius: $radius-sm;
+  background: $color-surface-hover;
+  font-family: $font-mono;
+  font-size: $font-size-xs;
+
+  &__bar {
+    width: 80px;
+    height: 6px;
+    border-radius: $radius-full;
+    background: $color-border;
+    overflow: hidden;
+    position: relative;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: $radius-full;
+    transition: width 300ms $ease-smooth, background 300ms $ease-smooth;
+
+    &--safe {
+      background: $accent-success;
+    }
+
+    &--warning {
+      background: $accent-warning;
+    }
+
+    &--critical {
+      background: $accent-error;
+      animation: pulse 1s ease-in-out infinite;
+    }
+  }
+
+  &__tier-segments {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    pointer-events: none;
+  }
+
+  &__tier-segment {
+    height: 100%;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__label {
+    color: $text-tertiary;
+    white-space: nowrap;
+  }
+
+  &__value {
+    color: $text-secondary;
+    font-weight: 600;
+
+    &--safe { color: $accent-success; }
+    &--warning { color: $accent-warning; }
+    &--critical { color: $accent-error; }
+  }
+
+  &__tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: $color-void;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: $space-2 $space-3;
+    font-size: $font-size-xs;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity $transition-fast;
+    z-index: 100;
+
+    .ramiro-context-meter:hover & {
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
