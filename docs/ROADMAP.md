@@ -31,24 +31,27 @@
 | Unit tests (5 suites) | ✅ | `5a4bde9` |
 | GitHub Actions CI | ✅ | `5a4bde9` |
 
-**Total: 21 commits, ~4,200 LOC, complete hexagonal architecture scaffold.**
+**Total: 22 commits, ~5,900 LOC, complete hexagonal architecture scaffold.**
 
 ---
 
-## Phase 1 — Audio Pipeline 🚧 NEXT
+## Phase 1 — Audio Pipeline ✅ COMPLETE
 
-| Task | Priority | Est. LOC |
-|------|----------|----------|
-| WhisperKit STT adapter (Swift native) | P0 | 300 |
-| MiMo V2 TTS adapter (streaming) | P0 | 250 |
-| Deepgram STT adapter (fallback) | P1 | 200 |
-| Gemini TTS adapter (fallback) | P1 | 200 |
-| Silero VAD integration (ONNX) | P0 | 150 |
-| Audio pipeline service (full flow) | P0 | 400 |
-| Push-to-talk mode | P1 | 100 |
-| Always-on mode with VAD | P1 | 150 |
-| Audio waveform component | P1 | 200 |
-| Integration tests (mic → response) | P0 | 300 |
+| Task | Status | Commit |
+|------|--------|--------|
+| WhisperKit STT adapter (Swift native) | ✅ | `33695ae` |
+| MiMo V2 TTS adapter (streaming) | ✅ | `33695ae` |
+| Deepgram STT adapter (fallback) | ✅ | `33695ae` |
+| Gemini TTS adapter (fallback) | ✅ | `33695ae` |
+| VAD processor (energy + zero-crossing) | ✅ | `33695ae` |
+| Audio pipeline service (full flow) | ✅ | `33695ae` |
+| Push-to-talk mode | ✅ | `33695ae` |
+| Always-on mode with VAD | ✅ | `33695ae` |
+| Audio waveform component | ✅ | `33695ae` |
+| ControlBar with pipeline state | ✅ | `33695ae` |
+| Unit tests: VAD (7 scenarios) | ✅ | `33695ae` |
+| Unit tests: AudioPipeline (8 scenarios) | ✅ | `33695ae` |
+| DI wiring for STT/TTS/pipeline | ✅ | `33695ae` |
 
 **Target:** <200ms end-to-end audio latency.
 
