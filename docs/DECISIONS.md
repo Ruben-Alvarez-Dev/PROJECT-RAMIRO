@@ -27,17 +27,20 @@
 
 ---
 
-## ADR-002: RAG Engine — Deferred Decision
+## ADR-002: RAG Engine — RagFlow (Primary) + LlamaIndex (Secondary)
 
-**Date:** 2026-04-29
-**Status:** DEFERRED
-**Context:** We need a RAG engine for TIER-06 pipe-rag (document ingestion). The opposition syllabus has hundreds of pages of text, some images, some videos, and long audio conversations.
+**Date:** 2026-04-29 → DECIDED 2026-04-30
+**Status:** DECIDED
+**Context:** We need a RAG engine for TIER-06 pipe-rag (document ingestion). The opposition syllabus has hundreds of pages of structured PDFs with sections, tables, figures, and legal references.
 
-**Decision:** Defer the RAG engine choice. Proceed with 6 RAG-agnostic FASE 3 tasks NOW.
+**Decision:** RagFlow as primary (document understanding + layout-aware chunking) + LlamaIndex as secondary (pipeline glue + Qdrant integration + fallback chunking).
 
 **Rationale:**
-- The compaction service, memory store, consolidator, focus anchoring, MCP tool, and long-session tests are all RAG-agnostic.
-- The RAG engine only blocks: document indexer (chunking + embedding), semantic search with Qdrant, and TIER-06 pipe-rag.
+- RagFlow has SOTA layout-aware chunking using DocLayout-YOLO. It parses PDFs preserving tables, figures, headers, and multi-column layouts — exactly what 300-page legal/academic PDFs need.
+- LlamaIndex provides the Python SDK for Qdrant integration, HierarchicalNodeParser as fallback, and multi-modal support.
+- R2R is too heavy for single-user (3 databases). Haystack chunking is too basic for legal PDFs. Pathway is a data framework, not a RAG engine.
+- See `docs/RAG-INVESTIGATION.md` for full comparison.
+- The 6 RAG-agnostic FASE 3 tasks proceed immediately regardless.
 - Deferring allows us to evaluate LlamaIndex, R2R, RagFlow, Haystack, and Pathway with actual data before committing.
 
 **Criteria for evaluation:**
