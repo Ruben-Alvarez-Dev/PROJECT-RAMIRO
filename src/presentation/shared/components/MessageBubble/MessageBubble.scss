@@ -1,0 +1,123 @@
+// src/presentation/shared/components/MessageBubble/MessageBubble.scss
+
+@import '../../styles/tokens';
+
+.ramiro-message {
+  display: flex;
+  gap: $space-3;
+  padding: $space-4;
+  border-radius: $radius-lg;
+  max-width: 85%;
+  animation: messageIn 0.2s $ease-smooth;
+
+  &--user {
+    margin-left: auto;
+    flex-direction: row-reverse;
+    background: rgba($accent-primary, 0.12);
+    border: 1px solid rgba($accent-primary, 0.2);
+  }
+
+  &--assistant {
+    margin-right: auto;
+    background: $color-surface;
+    border: 1px solid $color-border;
+  }
+
+  &--system {
+    margin: 0 auto;
+    max-width: 70%;
+    background: transparent;
+    border: 1px dashed $color-border;
+    text-align: center;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-full;
+    background: $color-surface-hover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+
+    &--user {
+      background: rgba($accent-primary, 0.2);
+      color: $accent-primary-light;
+    }
+
+    &--assistant {
+      background: rgba($accent-secondary, 0.2);
+      color: $accent-secondary;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__text {
+    color: $text-primary;
+    line-height: $line-height-relaxed;
+    word-break: break-word;
+
+    p {
+      margin-bottom: $space-2;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    code {
+      font-family: $font-mono;
+      font-size: $font-size-sm;
+      background: rgba($color-border, 0.5);
+      padding: $space-1 $space-2;
+      border-radius: $radius-sm;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    margin-top: $space-2;
+    font-size: $font-size-xs;
+    color: $text-tertiary;
+  }
+
+  &__sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-1;
+    margin-top: $space-2;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-1;
+    opacity: 0;
+    transition: opacity $transition-fast;
+
+    .ramiro-message:hover & {
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,334 @@
+// src/presentation/shared/styles/layout.scss
+@import './tokens';
+
+.ramiro-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  grid-template-rows: 56px 1fr 64px;
+  grid-template-areas:
+    "control-bar  control-bar"
+    "chat         knowledge"
+    "pipeline     pipeline";
+  height: 100vh;
+  width: 100vw;
+  gap: 0;
+  background: $color-void;
+
+  // ─── Control Bar ───
+  .ramiro-control-bar {
+    grid-area: control-bar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 $space-4;
+    background: $color-surface;
+    border-bottom: 1px solid $color-border;
+    z-index: 10;
+
+    &__left {
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+
+    &__title {
+      font-size: $font-size-lg;
+      font-weight: 700;
+      background: linear-gradient(135deg, $accent-primary, $accent-secondary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    &__status {
+      font-size: $font-size-xs;
+      color: $text-tertiary;
+      padding: $space-1 $space-2;
+      border-radius: $radius-full;
+      background: $color-surface-hover;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      &[data-state="active"] {
+        color: $accent-success;
+        background: rgba($accent-success, 0.1);
+      }
+
+      &[data-state="connecting"] {
+        color: $accent-warning;
+        background: rgba($accent-warning, 0.1);
+      }
+    }
+
+    &__center {
+      display: flex;
+      gap: $space-2;
+    }
+
+    &__right {
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+  }
+
+  // ─── Chat Panel ───
+  .ramiro-chat {
+    grid-area: chat;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &__messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: $space-4;
+      display: flex;
+      flex-direction: column;
+      gap: $space-3;
+    }
+
+    &__typing {
+      display: flex;
+      align-items: center;
+      gap: $space-2;
+      color: $text-tertiary;
+      font-size: $font-size-sm;
+      padding: $space-2 $space-4;
+    }
+
+    &__input-area {
+      display: flex;
+      flex-direction: column;
+      padding: $space-3 $space-4;
+      border-top: 1px solid $color-border;
+      background: $color-surface;
+    }
+
+    &__input {
+      width: 100%;
+      padding: $space-3 $space-4;
+      background: $color-void;
+      border: 1px solid $color-border;
+      border-radius: $radius-lg;
+      color: $text-primary;
+      font-size: $font-size-base;
+      transition: border-color $transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $accent-primary;
+        box-shadow: $glow-primary;
+      }
+
+      &::placeholder {
+        color: $text-tertiary;
+      }
+    }
+  }
+
+  // ─── Knowledge Sidebar ───
+  .ramiro-knowledge {
+    grid-area: knowledge;
+    display: flex;
+    flex-direction: column;
+    background: $color-surface;
+    border-left: 1px solid $color-border;
+    overflow: hidden;
+
+    &__search {
+      padding: $space-3;
+      border-bottom: 1px solid $color-border;
+    }
+
+    &__results {
+      flex: 1;
+      overflow-y: auto;
+      padding: $space-3;
+      display: flex;
+      flex-direction: column;
+      gap: $space-2;
+    }
+  }
+
+  // ─── Video Grid ───
+  .ramiro-video-grid {
+    display: grid;
+    gap: $space-2;
+    padding: $space-2;
+    background: $color-void;
+    border-bottom: 1px solid $color-border;
+
+    &[data-sources="1"] {
+      grid-template-columns: 1fr;
+      max-height: 300px;
+    }
+
+    &[data-sources="2"] {
+      grid-template-columns: 1fr 1fr;
+      max-height: 250px;
+    }
+
+    &[data-sources="3"],
+    &[data-sources="4"] {
+      grid-template-columns: 1fr 1fr;
+      max-height: 350px;
+    }
+
+    &__cell {
+      position: relative;
+      border-radius: $radius-md;
+      overflow: hidden;
+      background: $color-void;
+      border: 1px solid $color-border;
+
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    &__label {
+      position: absolute;
+      bottom: $space-2;
+      left: $space-2;
+      font-size: $font-size-xs;
+      color: $text-primary;
+      background: rgba(0, 0, 0, 0.6);
+      padding: $space-1 $space-2;
+      border-radius: $radius-sm;
+    }
+  }
+
+  // ─── Source Card ───
+  .ramiro-source-card {
+    padding: $space-3;
+    border-radius: $radius-md;
+    background: $color-surface-hover;
+    border: 1px solid $color-border;
+    transition: border-color $transition-fast;
+
+    &:hover {
+      border-color: $color-border-active;
+    }
+
+    &__title {
+      font-size: $font-size-sm;
+      font-weight: 600;
+      color: $text-primary;
+      margin: $space-1 0;
+    }
+
+    &__snippet {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+      line-height: $line-height-normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    &__score {
+      font-size: $font-size-xs;
+      color: $accent-secondary;
+      font-family: $font-mono;
+    }
+  }
+
+  // ─── Tier Badge ───
+  .ramiro-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: $space-1 $space-2;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    font-family: $font-mono;
+    border-radius: $radius-sm;
+
+    &[data-tier="0"] {
+      background: rgba($accent-warning, 0.15);
+      color: $accent-warning;
+    }
+
+    &[data-tier="1"] {
+      background: rgba($accent-primary, 0.15);
+      color: $accent-primary-light;
+    }
+
+    &[data-tier="2"] {
+      background: rgba($accent-secondary, 0.15);
+      color: $accent-secondary;
+    }
+
+    &[data-tier="3"] {
+      background: rgba($text-tertiary, 0.15);
+      color: $text-tertiary;
+    }
+  }
+
+  // ─── Waveform / Stream Indicator ───
+  .ramiro-waveform {
+    padding: $space-2 0;
+  }
+
+  .ramiro-stream-indicator {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+
+    &[data-active="true"] {
+      color: $accent-error;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  // ─── Spinner ───
+  .ramiro-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid $color-border;
+    border-top-color: $accent-primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  // ─── Context Meter ───
+  .ramiro-context-meter {
+    font-size: $font-size-xs;
+    color: $text-tertiary;
+    font-family: $font-mono;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 768px) {
+  .ramiro-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "control-bar"
+      "chat"
+      "pipeline";
+
+    .ramiro-knowledge {
+      display: none; // collapse to modal on mobile
+    }
+
+    .ramiro-video-grid {
+      max-height: 200px;
+    }
+  }
+}
+
+// ─── Animations ───
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

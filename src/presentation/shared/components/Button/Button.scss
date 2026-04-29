@@ -1,0 +1,93 @@
+// src/presentation/shared/components/Button/Button.scss
+
+@import '../../styles/tokens';
+
+.ramiro-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+  font-family: $font-sans;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  line-height: $line-height-tight;
+  border-radius: $radius-md;
+  transition: all $transition-fast;
+  user-select: none;
+
+  // ─── Variants ───
+  &--primary {
+    background: $accent-primary;
+    color: $text-primary;
+
+    &:hover {
+      background: darken($accent-primary, 8%);
+      box-shadow: $glow-primary;
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &--secondary {
+    background: $color-surface;
+    color: $text-primary;
+    border: 1px solid $color-border;
+
+    &:hover {
+      background: $color-surface-hover;
+      border-color: $color-border-active;
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $text-secondary;
+
+    &:hover {
+      background: $color-surface-hover;
+      color: $text-primary;
+    }
+  }
+
+  &--icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: $color-surface;
+    border-radius: $radius-full;
+
+    &:hover {
+      background: $color-surface-hover;
+    }
+  }
+
+  // ─── Sizes ───
+  &--sm {
+    padding: $space-2 $space-3;
+    font-size: $font-size-xs;
+  }
+
+  &--lg {
+    padding: $space-4 $space-6;
+    font-size: $font-size-lg;
+  }
+
+  // ─── States ───
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &--loading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+}
