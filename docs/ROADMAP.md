@@ -31,7 +31,27 @@
 | Unit tests (5 suites) | ✅ | `5a4bde9` |
 | GitHub Actions CI | ✅ | `5a4bde9` |
 
-**Total: 23 commits, ~7,200 LOC, complete hexagonal architecture scaffold + audio pipeline.**
+**Total: 31 commits, ~8,200 LOC, complete hexagonal architecture + audio + video + memory.**
+
+---
+
+## Phase 3 — Knowledge & Memory ✅ COMPLETE
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Compaction service (Claude Code 2-layer: snip + auto-compact) | ✅ | `eb6e38d` |
+| Memory file store (.md + YAML frontmatter pattern) | ✅ | `eb6e38d` |
+| Memory consolidator (max 3 insights per session) | ✅ | `eb6e38d` |
+| Focus anchoring (topic tracking for TIER 1 prioritization) | ✅ | `eb6e38d` |
+| MCP tool: ramiro-knowledge (4 tools for Goose) | ✅ | `eb6e38d` |
+| Stagnation monitor (3 triggers: same error, no progress, repeated question) | ✅ | `91813b0` |
+| Conflict resolver (user > model, confidence, quarantine) | ✅ | `91813b0` |
+| Unit tests: Compaction (5 tests) | ✅ | `eb6e38d` |
+| Unit tests: FocusAnchoring (8 tests) | ✅ | `eb6e38d` |
+| Unit tests: MemoryStore (6 tests) | ✅ | `eb6e38d` |
+| RAG engine decision: RagFlow + LlamaIndex | ✅ | `bee27ea` |
+
+**Target:** 2-hour sessions, auto-cleanup at 70%, focus anchoring active.
 
 ---
 
