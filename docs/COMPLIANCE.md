@@ -96,8 +96,8 @@
 
 ## DEC-009: Jart-OS — Ramiro como ciudadano de TIER-04
 
-- **Decisión:** Ramiro no es un TIER. Ramiro es un agente ciudadano que vive en TIER-04 (AGENTS) y usa recursos de otros TIERs.
-- **Estado:** VIGENTE
+- **Decisión:** Ramiro es un agente transversal (Director of Communication), NO un ciudadano de TIER-04. Los TIERs son para infraestructura y apps (dónde se despliega). Los agentes son actores transversales (quién hace el trabajo). Ramiro vive en `agents/` y opera a través de todos los TIERs.
+- **Estado:** VIGENTE (corregido 2026-04-30)
 - **Justificación:** Jart-OS tiene 10 TIERs con responsabilidades claras. Ramiro pertenece a TIER-04 como agente con arquitectura interna Director + Executor + Guardian + Council. Usa TIER-00 (engines LLM), TIER-02 (gateway LiteLLM), TIER-03 (Redis/NATS), TIER-05 (AudioPipeline/VideoPipeline), TIER-06 (pipe-rag), TIER-07 (interfaces web/tauri/telegram), TIER-08 (Knowledge/Qdrant), TIER-09 (métricas/Prometheus).
 - **Fuente:** Repositorio canónico de Jart-OS (`/Users/ruben/Code/Jart-OS/`). VISION.md, ARCHITECTURE.md, TIERS/. Definición original de la arquitectura por Ruben.
 - **Afecta a:** Todo el proyecto. `docs/JART-OS-INTEGRATION.md`, `docs/KNOWLEDGE-TIER.md`, `docs/ARCHITECTURE.md`, todos los módulos de infraestructura.
