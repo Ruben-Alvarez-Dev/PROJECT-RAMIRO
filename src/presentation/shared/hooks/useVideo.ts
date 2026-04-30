@@ -1,126 +1,108 @@
-// src/presentation/shared/hooks/useVideo.ts
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
+import { StreamType } from '@core/domain/enums';
 
-interface VideoSource {
+export interface VideoSource {
   id: string;
-  type: 'camera' | 'screen' | 'window';
   name: string;
+  type: 'camera' | 'screen' | 'window' | 'app';
   stream: MediaStream;
 }
 
-interface UseVideoState {
+export interface UseVideoReturn {
   isStreaming: boolean;
   sources: VideoSource[];
+  focusedId: string | null;
   error: string | null;
+  startCamera: () => Promise<void>;
+  startScreen: () => Promise<void>;
+  startWindow: () => Promise<void>;
+  stopSource: (id: string) => void;
+  stopAll: () => void;
+  focusSource: (id: string) => void;
 }
 
-export function useVideo() {
-  const [state, setState] = useState<UseVideoState>({
-    isStreaming: false,
-    sources: [],
-    error: null,
-  });
+export function useVideo(): UseVideoReturn {
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [sources, setSources] = useState<VideoSource[]>([]);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const streamsRef = useRef<Map<string, MediaStream>>(new Map());
 
-  const sourcesRef = useRef<Map<string, VideoSource>>(new Map());
+  const addSource = useCallback((type: VideoSource['type'], stream: MediaStream, name: string) => {
+    const id = `${type}-${Date.now()}`;
+    streamsRef.current.set(id, stream);
+    setSources(prev => [...prev, { id, name, type, stream }]);
+    setIsStreaming(true);
+    if (!focusedId) setFocusedId(id);
+  }, [focusedId]);
 
-  const startCamera = useCallback(async (deviceId?: string) => {
+  const startCamera = useCallback(async () => {
     try {
+      setError(null);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: deviceId ? { deviceId: { exact: deviceId } } : {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 15 },
-        },
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 15 } },
       });
-
-      const source: VideoSource = {
-        id: `camera-${Date.now()}`,
-        type: 'camera',
-        name: 'Camera',
-        stream,
-      };
-
-      sourcesRef.current.set(source.id, source);
-      setState(prev => ({
-        ...prev,
-        isStreaming: true,
-        sources: Array.from(sourcesRef.current.values()),
-        error: null,
-      }));
-
-      return source;
+      addSource('camera', stream, 'Camera');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to start camera';
-      setState(prev => ({ ...prev, error: message }));
-      return null;
+      setError(err instanceof Error ? err.message : 'Camera access denied');
     }
-  }, []);
+  }, [addSource]);
 
-  const startScreenCapture = useCallback(async () => {
+  const startScreen = useCallback(async () => {
     try {
+      setError(null);
       const stream = await (navigator.mediaDevices as any).getDisplayMedia({
-        video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 15 },
-        },
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 15 } },
         audio: false,
       });
-
-      const source: VideoSource = {
-        id: `screen-${Date.now()}`,
-        type: 'screen',
-        name: 'Screen Share',
-        stream,
-      };
-
-      sourcesRef.current.set(source.id, source);
-      setState(prev => ({
-        ...prev,
-        isStreaming: true,
-        sources: Array.from(sourcesRef.current.values()),
-        error: null,
-      }));
-
-      // Handle user stopping share via browser UI
-      stream.getVideoTracks()[0]?.addEventListener('ended', () => {
-        removeSource(source.id);
-      });
-
-      return source;
+      addSource('screen', stream, 'Screen');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to start screen capture';
-      setState(prev => ({ ...prev, error: message }));
-      return null;
+      setError(err instanceof Error ? err.message : 'Screen share denied');
     }
-  }, []);
+  }, [addSource]);
 
-  const removeSource = useCallback((sourceId: string) => {
-    const source = sourcesRef.current.get(sourceId);
-    if (source) {
-      source.stream.getTracks().forEach(t => t.stop());
-      sourcesRef.current.delete(sourceId);
-      setState(prev => ({
-        ...prev,
-        sources: Array.from(sourcesRef.current.values()),
-        isStreaming: sourcesRef.current.size > 0,
-      }));
+  const startWindow = useCallback(async () => {
+    try {
+      setError(null);
+      const stream = await (navigator.mediaDevices as any).getDisplayMedia({
+        video: { displaySurface: 'window' } as any,
+        audio: false,
+      });
+      addSource('window', stream, 'Window');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Window capture denied');
     }
-  }, []);
+  }, [addSource]);
+
+  const stopSource = useCallback((id: string) => {
+    const stream = streamsRef.current.get(id);
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      streamsRef.current.delete(id);
+    }
+    setSources(prev => {
+      const next = prev.filter(s => s.id !== id);
+      if (next.length === 0) setIsStreaming(false);
+      return next;
+    });
+    if (focusedId === id) {
+      setFocusedId(sources.find(s => s.id !== id)?.id ?? null);
+    }
+  }, [focusedId, sources]);
 
   const stopAll = useCallback(() => {
-    for (const [, source] of sourcesRef.current) {
-      source.stream.getTracks().forEach(t => t.stop());
+    for (const [, stream] of streamsRef.current) {
+      stream.getTracks().forEach(t => t.stop());
     }
-    sourcesRef.current.clear();
-    setState(prev => ({ ...prev, isStreaming: false, sources: [] }));
+    streamsRef.current.clear();
+    setSources([]);
+    setIsStreaming(false);
+    setFocusedId(null);
   }, []);
 
-  return {
-    ...state,
-    startCamera,
-    startScreenCapture,
-    removeSource,
-    stopAll,
-  };
+  const focusSource = useCallback((id: string) => {
+    setFocusedId(id);
+  }, []);
+
+  return { isStreaming, sources, focusedId, error, startCamera, startScreen, startWindow, stopSource, stopAll, focusSource };
 }

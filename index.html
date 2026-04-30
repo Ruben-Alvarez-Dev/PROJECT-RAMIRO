@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0a0a0f" />
-  <meta name="description" content="PROJECT-RAMIRO — Realtime Autonomous Multimodal Intelligence" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <title>Ramiro</title>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/presentation/shared/main.tsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#6c5ce7" />
+    <meta name="description" content="Ramiro — Realtime Autonomous Multimodal Intelligence" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <title>Ramiro</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/presentation/shared/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+    </script>
+  </body>
 </html>

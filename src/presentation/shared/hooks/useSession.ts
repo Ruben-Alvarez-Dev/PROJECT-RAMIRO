@@ -1,90 +1,68 @@
-// src/presentation/shared/hooks/useSession.ts
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
+import { SessionState, SessionType, MessageRole } from '@core/domain/enums';
 import type { Message, Session } from '@core/domain/types';
-import { SessionState, SessionType, MessageRole, TierLevel } from '@core/domain/enums';
+import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
+import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
 
-interface UseSessionState {
+export interface UseSessionReturn {
   session: Session | null;
   messages: Message[];
-  isProcessing: boolean;
-  error: string | null;
+  state: SessionState;
+  createSession: (type: SessionType) => void;
+  updateState: (state: SessionState) => void;
+  addMessage: (role: MessageRole, content: string) => void;
+  clearSession: () => void;
 }
 
-export function useSession() {
-  const [state, setState] = useState<UseSessionState>({
-    session: null,
-    messages: [],
-    isProcessing: false,
-    error: null,
-  });
+export function useSession(): UseSessionReturn {
+  const [session, setSession] = useState<Session | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [state, setState] = useState<SessionState>(SessionState.IDLE);
 
   const createSession = useCallback((type: SessionType) => {
-    const session: Session = {
+    const newSession: Session = {
       id: crypto.randomUUID(),
-      state: SessionState.IDLE,
+      state: SessionState.CONNECTING,
       type,
       sources: [],
-      modelConfig: {
-        omni: { provider: 'xiaomi', model: 'mimo-v2-omni', temperature: 0.1, maxTokens: 32768 },
-        pro: { provider: 'xiaomi', model: 'mimo-v2.5-pro', temperature: 0.1, maxTokens: 32768 },
-        tts: { provider: 'xiaomi', model: 'mimo-v2-tts', temperature: 0.1, maxTokens: 4096 },
-        stt: { provider: 'xiaomi', model: 'mimo-v2-omni', temperature: 0, maxTokens: 4096 },
-        fallback: { provider: 'qwen', model: 'qwen2.5-omni', temperature: 0.1, maxTokens: 32768 },
-      },
-      knowledgeConfig: {
-        tier0Paths: [],
-        tier1Collections: ['default'],
-        maxContextTokens: 1_000_000,
-        autoSummarize: true,
-        focusAnchoring: true,
-      },
+      modelConfig: DEFAULT_MODEL_CONFIG,
+      knowledgeConfig: DEFAULT_KNOWLEDGE_CONFIG,
       messages: [],
       memory: [],
       metadata: {},
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-
-    setState(prev => ({ ...prev, session, messages: [], error: null }));
-    return session;
+    setSession(newSession);
+    setMessages([]);
+    setState(SessionState.CONNECTING);
   }, []);
 
-  const addMessage = useCallback((role: MessageRole, content: string, model?: string) => {
-    const message: Message = {
+  const updateState = useCallback((newState: SessionState) => {
+    setState(newState);
+    setSession(prev => prev ? { ...prev, state: newState, updatedAt: new Date() } : null);
+  }, []);
+
+  const addMessage = useCallback((role: MessageRole, content: string) => {
+    const msg: Message = {
       id: crypto.randomUUID(),
       role,
       content,
-      model: model || 'user',
-      tier: TierLevel.DYNAMIC,
-      tokenCount: Math.ceil(content.length / 4),
+      model: role === MessageRole.USER ? 'user' : 'ramiro',
+      tier: 3, // ephemeral
+      tokenCount: Math.ceil(content.length / 3.5),
       metadata: {},
       createdAt: new Date(),
     };
-
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, message],
-    }));
-
-    return message;
+    setMessages(prev => [...prev, msg]);
+    setSession(prev => prev ? { ...prev, messages: [...prev.messages, msg], updatedAt: new Date() } : null);
   }, []);
 
-  const setProcessing = useCallback((isProcessing: boolean) => {
-    setState(prev => ({ ...prev, isProcessing }));
+  const clearSession = useCallback(() => {
+    setSession(null);
+    setMessages([]);
+    setState(SessionState.IDLE);
   }, []);
 
-  const updateState = useCallback((sessionState: SessionState) => {
-    setState(prev => ({
-      ...prev,
-      session: prev.session ? { ...prev.session, state: sessionState, updatedAt: new Date() } : null,
-    }));
-  }, []);
-
-  return {
-    ...state,
-    createSession,
-    addMessage,
-    setProcessing,
-    updateState,
-  };
+  return { session, messages, state, createSession, updateState, addMessage, clearSession };
 }

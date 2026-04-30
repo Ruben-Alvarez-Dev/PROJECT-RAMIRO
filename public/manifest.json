@@ -1,0 +1,19 @@
+{
+  "name": "Ramiro",
+  "short_name": "Ramiro",
+  "description": "Realtime Autonomous Multimodal Intelligence",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d12",
+  "theme_color": "#6c5ce7",
+  "orientation": "any",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    { "name": "Voice Session", "url": "/?mode=voice", "description": "Start a voice session" },
+    { "name": "Video Session", "url": "/?mode=video", "description": "Start a video session" }
+  ]
+}

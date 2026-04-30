@@ -1,54 +1,54 @@
-// src/presentation/shared/hooks/useKnowledge.ts
 import { useState, useCallback } from 'react';
+import { TierLevel } from '@core/domain/enums';
 
-interface SearchResult {
+export interface KnowledgeResult {
   documentId: string;
   title: string;
   chunk: string;
   score: number;
-  tier: number;
+  tier: TierLevel;
 }
 
-interface UseKnowledgeState {
-  results: SearchResult[];
+export interface UseKnowledgeReturn {
+  results: KnowledgeResult[];
   isSearching: boolean;
   error: string | null;
+  search: (query: string, tier?: TierLevel) => Promise<void>;
+  clear: () => void;
 }
 
-export function useKnowledge() {
-  const [state, setState] = useState<UseKnowledgeState>({
-    results: [],
-    isSearching: false,
-    error: null,
-  });
+export function useKnowledge(): UseKnowledgeReturn {
+  const [results, setResults] = useState<KnowledgeResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const search = useCallback(async (query: string, tier?: number) => {
-    setState(prev => ({ ...prev, isSearching: true, error: null }));
-
+  const search = useCallback(async (query: string, tier?: TierLevel) => {
+    setIsSearching(true);
+    setError(null);
     try {
-      const params = new URLSearchParams({ query });
-      if (tier !== undefined) params.set('tier', String(tier));
-
-      const response = await fetch(`/api/knowledge/search?${params}`);
-      if (!response.ok) throw new Error(`Search failed: ${response.statusText}`);
-
-      const data = await response.json() as { results: SearchResult[] };
-      setState(prev => ({ ...prev, results: data.results, isSearching: false }));
-      return data.results;
+      // Placeholder: will connect to Qdrant via MCP tool
+      // For now, return mock results
+      const mockResults: KnowledgeResult[] = [
+        {
+          documentId: '1',
+          title: query,
+          chunk: `Search results for: ${query}. Connect to ramiro-knowledge MCP for real results.`,
+          score: 0.85,
+          tier: tier ?? TierLevel.CORE,
+        },
+      ];
+      setResults(mockResults);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Search failed';
-      setState(prev => ({ ...prev, error: message, isSearching: false }));
-      return [];
+      setError(err instanceof Error ? err.message : 'Search failed');
+    } finally {
+      setIsSearching(false);
     }
   }, []);
 
-  const clearResults = useCallback(() => {
-    setState(prev => ({ ...prev, results: [], error: null }));
+  const clear = useCallback(() => {
+    setResults([]);
+    setError(null);
   }, []);
 
-  return {
-    ...state,
-    search,
-    clearResults,
-  };
+  return { results, isSearching, error, search, clear };
 }
