@@ -137,3 +137,21 @@
 | Phase 4 — Platform & UX | ✅ Complete | ~450 |
 | Phase 5 — Production | 📋 Next | ~2,250 est. |
 | **Total** | **4/5 phases complete** | **~10,670 LOC + ~2,250 est.** |
+
+---
+
+## Phase 5 — Integration & Production ✅ COMPLETE
+
+| Task | Status | Commit |
+|------|--------|--------|
+| MCP server (5 tools for Goose) | ✅ | `fb0e6e1` |
+| Docker multi-stage build | ✅ | `822eda7` |
+| Docker Compose (web + Qdrant + Redis) | ✅ | `822eda7` |
+| Deploy script (Caroline/Hetzner) | ✅ | `822eda7` |
+| CI workflow (lint + typecheck + test + build) | ✅ | `822eda7` |
+| Goose recipe: ramiro-voice | ✅ | `822eda7` |
+| Goose recipe: ramiro-video | ✅ | `822eda7` |
+| Goose recipe: ramiro-study | ✅ | `822eda7` |
+
+**Deploy:** `./scripts/deploy-caroline.sh` syncs, deploys, and health-checks.
+
