@@ -187,3 +187,21 @@
 **Current state:** The adapter connects via obs-websocket v5. It works as a video source alongside camera/screen/window. When Ruben wants to use OBS, it's just another source in the FrameSampler.
 
 **No rush:** OBS integration is P2 (nice-to-have). The primary video pipeline (camera + screen + window) works without OBS.
+
+---
+
+## ADR-009: Recovery Decisions
+
+**Date:** 2026-06-03
+**Status:** ACCEPTED
+**Context:** A verification pass found the project was "green on paper" — docs marked every phase complete, but build, typecheck, the full test suite and lint all failed because the toolchain had never been run. See [`RECOVERY.md`](./RECOVERY.md) for the full report.
+
+**Decisions made during recovery:**
+
+1. **`noNonNullAssertion` stays a warning, not an error.** It is the sanctioned escape hatch for `noUncheckedIndexedAccess`. Disabling the rule hides the smell; mass-rewriting to `?.` changes semantics. Visible-but-non-blocking is the right severity.
+2. **Core must stay DOM-free.** Removed `VideoFrame.data` (DOM-typed, unconsumed); pixels cross boundaries as the domain-neutral `ImageBuffer`.
+3. **Production build is isolated from tests** via `tsconfig.build.json`, so a broken test can never break a release. The `typecheck` script still covers everything.
+4. **Dead injected dependencies are removed, not faked.** An unused collaborator lies about a class's dependencies; it is re-introduced when the feature that needs it is wired (tracked in `ARCHITECTURE-DEBT.md`).
+5. **Recovery is committed wave-by-wave** (baseline → lint → architecture → CI/docs) so history reads as a recovery, not an opaque dump.
+
+**Consequences:** `bash scripts/verify.sh` is the canonical gate; CI enforces the same. Deferred architectural debt is tracked explicitly in `ARCHITECTURE-DEBT.md`.

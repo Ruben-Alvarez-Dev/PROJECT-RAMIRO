@@ -19,9 +19,10 @@ and lint all failed**. A 4-wave recovery restored a verifiable green baseline:
 | CI (`vitest --coverage`) | missing dep | **OK, 87% coverage** |
 
 Notable correctness bug fixed: the orchestrator's model failover never triggered
-(a missing `await` let the rejected promise escape its `try/catch`). Remaining
-deferred debt is tracked in [`ARCHITECTURE-DEBT.md`](./ARCHITECTURE-DEBT.md).
-Run `bash scripts/verify.sh` before pushing.
+(a missing `await` let the rejected promise escape its `try/catch`). Full report:
+[`RECOVERY.md`](./RECOVERY.md). Remaining deferred debt:
+[`ARCHITECTURE-DEBT.md`](./ARCHITECTURE-DEBT.md). Decisions: ADR-009 in
+[`DECISIONS.md`](./DECISIONS.md). Run `bash scripts/verify.sh` before pushing.
 
 ---
 
