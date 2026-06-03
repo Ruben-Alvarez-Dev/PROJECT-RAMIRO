@@ -1,8 +1,8 @@
 // src/infrastructure/adapters/audio/livekit-audio.adapter.ts
 
-import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
-import type { AudioConfig, AudioDevice, AudioFrame, StreamHandle } from '@core/domain/types';
 import { StreamStatus, StreamType } from '@core/domain/enums';
+import type { AudioConfig, AudioDevice, AudioFrame, StreamHandle } from '@core/domain/types';
+import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
 import { StreamError } from '@shared/errors/domain.error';
 import { Logger } from '@shared/logging/logger';
 
@@ -35,7 +35,11 @@ export class LiveKitAudioAdapter implements IAudioInputPort {
 
       this.audioContext = new AudioContext({ sampleRate: config.sampleRate });
       const source = this.audioContext.createMediaStreamSource(stream);
-      this.processor = this.audioContext.createScriptProcessor(4096, config.channels, config.channels);
+      this.processor = this.audioContext.createScriptProcessor(
+        4096,
+        config.channels,
+        config.channels,
+      );
 
       source.connect(this.processor);
       this.processor.connect(this.audioContext.destination);
@@ -72,7 +76,7 @@ export class LiveKitAudioAdapter implements IAudioInputPort {
   async stopCapture(handle: StreamHandle): Promise<void> {
     const stream = this.activeStreams.get(handle.id);
     if (stream) {
-      stream.getTracks().forEach(t => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
       this.activeStreams.delete(handle.id);
     }
     if (this.processor) {
@@ -93,8 +97,8 @@ export class LiveKitAudioAdapter implements IAudioInputPort {
   async getAvailableDevices(): Promise<AudioDevice[]> {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices
-      .filter(d => d.kind === 'audioinput')
-      .map(d => ({ deviceId: d.deviceId, label: d.label, groupId: d.groupId }));
+      .filter((d) => d.kind === 'audioinput')
+      .map((d) => ({ deviceId: d.deviceId, label: d.label, groupId: d.groupId }));
   }
 
   async selectDevice(deviceId: string): Promise<void> {

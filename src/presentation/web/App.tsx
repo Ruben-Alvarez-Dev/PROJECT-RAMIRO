@@ -1,16 +1,16 @@
+import type { AudioPipelineState } from '@application/services/audio/audio-pipeline.service';
+import { MessageRole, SessionState, SessionType } from '@core/domain/enums';
 // src/presentation/web/App.tsx
-import React, { useState, useCallback } from 'react';
+import type React from 'react';
+import { useCallback, useState } from 'react';
+import { AudioWaveform } from '../shared/components/AudioWaveform';
 import { ControlBar } from '../shared/components/ControlBar';
 import { MessageBubble } from '../shared/components/MessageBubble';
-import { AudioWaveform } from '../shared/components/AudioWaveform';
-import { Button } from '../shared/components/Button';
 import type { ModelMode } from '../shared/components/ModelSwitch';
-import { useSession } from '../shared/hooks/useSession';
 import { useAudio } from '../shared/hooks/useAudio';
-import { useVideo } from '../shared/hooks/useVideo';
 import { useKnowledge } from '../shared/hooks/useKnowledge';
-import { SessionType, MessageRole, SessionState } from '@core/domain/enums';
-import type { AudioPipelineState } from '@application/services/audio/audio-pipeline.service';
+import { useSession } from '../shared/hooks/useSession';
+import { useVideo } from '../shared/hooks/useVideo';
 import '../shared/styles/reset.scss';
 import '../shared/styles/layout.scss';
 
@@ -35,7 +35,7 @@ export const App: React.FC = () => {
     session.updateState(SessionState.CONNECTING);
     audio.startCapture();
     session.updateState(SessionState.ACTIVE);
-    setPipelineState(prev => ({ ...prev, status: 'capturing' }));
+    setPipelineState((prev) => ({ ...prev, status: 'capturing' }));
   }, [session, audio]);
 
   const handleStartVideo = useCallback(() => {
@@ -43,7 +43,7 @@ export const App: React.FC = () => {
     session.updateState(SessionState.CONNECTING);
     video.startCamera();
     session.updateState(SessionState.ACTIVE);
-    setPipelineState(prev => ({ ...prev, status: 'capturing' }));
+    setPipelineState((prev) => ({ ...prev, status: 'capturing' }));
   }, [session, video]);
 
   const handleStop = useCallback(() => {
@@ -57,10 +57,10 @@ export const App: React.FC = () => {
   const handleMicToggle = useCallback(() => {
     if (isMicActive) {
       setIsMicActive(false);
-      setPipelineState(prev => ({ ...prev, status: 'capturing' }));
+      setPipelineState((prev) => ({ ...prev, status: 'capturing' }));
     } else {
       setIsMicActive(true);
-      setPipelineState(prev => ({ ...prev, status: 'listening' }));
+      setPipelineState((prev) => ({ ...prev, status: 'listening' }));
     }
   }, [isMicActive]);
 
@@ -115,7 +115,11 @@ export const App: React.FC = () => {
           {session.messages.length === 0 && session.session && (
             <div className="ramiro-chat__empty">
               <AudioWaveform isActive={pipelineState.status === 'listening'} barCount={32} />
-              <p>{pipelineState.status === 'listening' ? 'Listening...' : 'Press the mic button to speak.'}</p>
+              <p>
+                {pipelineState.status === 'listening'
+                  ? 'Listening...'
+                  : 'Press the mic button to speak.'}
+              </p>
             </div>
           )}
           {session.messages.map((msg) => (
@@ -140,7 +144,9 @@ export const App: React.FC = () => {
           {pipelineState.currentTranscript && (
             <div className="ramiro-chat__transcript">
               <span className="ramiro-chat__transcript-label">You said:</span>
-              <span className="ramiro-chat__transcript-text">{pipelineState.currentTranscript}</span>
+              <span className="ramiro-chat__transcript-text">
+                {pipelineState.currentTranscript}
+              </span>
             </div>
           )}
           <input
@@ -177,14 +183,14 @@ export const App: React.FC = () => {
               </span>
               <h4 className="ramiro-source-card__title">{result.title}</h4>
               <p className="ramiro-source-card__snippet">{result.chunk}</p>
-              <span className="ramiro-source-card__score">
-                {(result.score * 100).toFixed(1)}%
-              </span>
+              <span className="ramiro-source-card__score">{(result.score * 100).toFixed(1)}%</span>
             </div>
           ))}
           {knowledge.results.length === 0 && !knowledge.isSearching && (
             <div className="ramiro-knowledge__empty">
-              <p>Search your knowledge base for oposition materials, documentation, and references.</p>
+              <p>
+                Search your knowledge base for oposition materials, documentation, and references.
+              </p>
             </div>
           )}
         </div>

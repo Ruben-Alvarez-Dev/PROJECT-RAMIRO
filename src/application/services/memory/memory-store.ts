@@ -9,11 +9,11 @@ export interface MemoryEntry {
   type: 'user' | 'feedback' | 'project' | 'reference';
   content: string;
   filePath?: string;
-  created: string;          // ISO date
+  created: string; // ISO date
   scope: 'user' | 'project';
-  confidence: number;       // 0.0-1.0
+  confidence: number; // 0.0-1.0
   source: 'user' | 'consolidator' | 'model' | 'tool';
-  lastUsedAt?: string;      // ISO date
+  lastUsedAt?: string; // ISO date
   conflictGroup?: string;
 }
 
@@ -26,13 +26,9 @@ export interface MemoryIndex {
 // In-memory implementation (Tauri/SQLite bridge replaces later)
 export class MemoryStore {
   private entries = new Map<string, MemoryEntry>();
-  private readonly userDir: string;
-  private readonly projectDir: string;
 
-  constructor(userDir = '~/.ramiro/memory', projectDir = '.ramiro/memory') {
-    this.userDir = userDir;
-    this.projectDir = projectDir;
-  }
+  // Directory params are reserved for the future Tauri/SQLite file backend.
+  constructor(_userDir = '~/.ramiro/memory', _projectDir = '.ramiro/memory') {}
 
   async save(entry: MemoryEntry): Promise<void> {
     const key = this.makeKey(entry.name, entry.scope);
@@ -73,8 +69,8 @@ export class MemoryStore {
 
   async list(scope?: MemoryEntry['scope']): Promise<MemoryIndex> {
     const entries = Array.from(this.entries.values())
-      .filter(e => !scope || e.scope === scope)
-      .map(e => ({ name: e.name, description: e.description, file: e.filePath ?? '' }));
+      .filter((e) => !scope || e.scope === scope)
+      .map((e) => ({ name: e.name, description: e.description, file: e.filePath ?? '' }));
 
     return { entries, totalEntries: entries.length, scope: scope ?? 'all' };
   }
@@ -86,8 +82,8 @@ export class MemoryStore {
 
   getIndexContent(scope: MemoryEntry['scope'] = 'user'): string {
     const entries = Array.from(this.entries.values())
-      .filter(e => e.scope === scope)
-      .map(e => `- [${e.name}](memory/${e.name}.md) — ${e.description}`);
+      .filter((e) => e.scope === scope)
+      .map((e) => `- [${e.name}](memory/${e.name}.md) — ${e.description}`);
 
     return entries.join('\n') + (entries.length > 0 ? '\n' : '');
   }

@@ -2,9 +2,8 @@
 // MCP tool exposing Ramiro's knowledge base to Goose.
 // Tools: search_knowledge, add_memory, recall_memory, get_context_status
 
-import type { MemoryStore, MemoryEntry } from '@application/services/memory/memory-store';
 import type { FocusAnchoringService } from '@application/services/knowledge/focus-anchoring.service';
-import type { CompactionService } from '@application/services/memory/compaction.service';
+import type { MemoryEntry, MemoryStore } from '@application/services/memory/memory-store';
 import { Logger } from '@shared/logging/logger';
 
 export interface MCPToolResult {
@@ -18,7 +17,6 @@ export class RamiroKnowledgeMCP {
   constructor(
     private readonly memoryStore: MemoryStore,
     private readonly focusService: FocusAnchoringService,
-    private readonly compactionService: CompactionService,
   ) {}
 
   // Tool 1: Search knowledge base
@@ -31,18 +29,29 @@ export class RamiroKnowledgeMCP {
         return { content: `No knowledge found for: "${query}"` };
       }
 
-      const formatted = topResults.map((r, i) =>
-        `[${i + 1}] ${r.name} (${r.type}, confidence: ${r.confidence})\n    ${r.description}\n    ${r.content.slice(0, 300)}`
-      ).join('\n\n');
+      const formatted = topResults
+        .map(
+          (r, i) =>
+            `[${i + 1}] ${r.name} (${r.type}, confidence: ${r.confidence})\n    ${r.description}\n    ${r.content.slice(0, 300)}`,
+        )
+        .join('\n\n');
 
       return { content: `Found ${topResults.length} results:\n\n${formatted}` };
     } catch (error) {
-      return { content: `Search error: ${error instanceof Error ? error.message : 'Unknown'}`, isError: true };
+      return {
+        content: `Search error: ${error instanceof Error ? error.message : 'Unknown'}`,
+        isError: true,
+      };
     }
   }
 
   // Tool 2: Add memory
-  async addMemory(name: string, description: string, content: string, type: MemoryEntry['type'] = 'user'): Promise<MCPToolResult> {
+  async addMemory(
+    name: string,
+    description: string,
+    content: string,
+    type: MemoryEntry['type'] = 'user',
+  ): Promise<MCPToolResult> {
     try {
       const entry: MemoryEntry = {
         name,
@@ -59,7 +68,10 @@ export class RamiroKnowledgeMCP {
       this.logger.info('Memory added', { name, type });
       return { content: `Memory saved: "${name}" (${type})` };
     } catch (error) {
-      return { content: `Save error: ${error instanceof Error ? error.message : 'Unknown'}`, isError: true };
+      return {
+        content: `Save error: ${error instanceof Error ? error.message : 'Unknown'}`,
+        isError: true,
+      };
     }
   }
 
@@ -73,13 +85,19 @@ export class RamiroKnowledgeMCP {
         return { content: `No memories recalled for: "${query}"` };
       }
 
-      const formatted = recent.map(r =>
-        `[${r.name}] (confidence: ${r.confidence}, last used: ${r.lastUsedAt ?? 'never'})\n${r.content}`
-      ).join('\n\n---\n\n');
+      const formatted = recent
+        .map(
+          (r) =>
+            `[${r.name}] (confidence: ${r.confidence}, last used: ${r.lastUsedAt ?? 'never'})\n${r.content}`,
+        )
+        .join('\n\n---\n\n');
 
       return { content: `Recalled ${recent.length} memories:\n\n${formatted}` };
     } catch (error) {
-      return { content: `Recall error: ${error instanceof Error ? error.message : 'Unknown'}`, isError: true };
+      return {
+        content: `Recall error: ${error instanceof Error ? error.message : 'Unknown'}`,
+        isError: true,
+      };
     }
   }
 
@@ -96,7 +114,10 @@ export class RamiroKnowledgeMCP {
       `Topic messages: ${anchor?.messageCount ?? 0}`,
       ``,
       `=== Memory Index ===`,
-      index.entries.slice(0, 10).map(e => `- ${e.name}: ${e.description}`).join('\n'),
+      index.entries
+        .slice(0, 10)
+        .map((e) => `- ${e.name}: ${e.description}`)
+        .join('\n'),
     ].join('\n');
 
     return { content: status };

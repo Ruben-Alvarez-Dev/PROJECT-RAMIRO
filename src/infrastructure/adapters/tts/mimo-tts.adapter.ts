@@ -1,14 +1,14 @@
 // src/infrastructure/adapters/tts/mimo-tts.adapter.ts
 // Xiaomi MiMo V2 TTS — streaming synthesis with low first-byte latency
 
-import type { ITTSPort } from '@core/ports/output/tts.port';
 import type { AudioBuffer, VoiceConfig, VoiceInfo } from '@core/domain/types';
-import { Logger } from '@shared/logging/logger';
+import type { ITTSPort } from '@core/ports/output/tts.port';
 import { AdapterError } from '@shared/errors/domain.error';
+import { Logger } from '@shared/logging/logger';
 
 export class MiMoTTSAdapter implements ITTSPort {
   private readonly logger = new Logger('MiMoTTS');
-  private currentVoice: string = 'mimo-default';
+  private currentVoice = 'mimo-default';
 
   constructor(
     private readonly apiKey: string,
@@ -41,7 +41,7 @@ export class MiMoTTSAdapter implements ITTSPort {
     if (!reader) throw new AdapterError('No response body from MiMo TTS', 'xiaomi-tts');
 
     const CHUNK_SIZE = 4800; // 200ms at 24kHz mono
-    let buffer = new Uint8Array(0);
+    let buffer: Uint8Array<ArrayBufferLike> = new Uint8Array(0);
 
     while (true) {
       const { done, value } = await reader.read();
@@ -49,7 +49,8 @@ export class MiMoTTSAdapter implements ITTSPort {
 
       buffer = this.concatBuffers(buffer, value);
 
-      while (buffer.length >= CHUNK_SIZE * 2) { // *2 for 16-bit samples
+      while (buffer.length >= CHUNK_SIZE * 2) {
+        // *2 for 16-bit samples
         const chunkData = buffer.slice(0, CHUNK_SIZE * 2);
         buffer = buffer.slice(CHUNK_SIZE * 2);
 
@@ -98,7 +99,10 @@ export class MiMoTTSAdapter implements ITTSPort {
     this.logger.info('Voice changed', { voiceId });
   }
 
-  private concatBuffers(a: Uint8Array, b: Uint8Array): Uint8Array {
+  private concatBuffers(
+    a: Uint8Array<ArrayBufferLike>,
+    b: Uint8Array<ArrayBufferLike>,
+  ): Uint8Array {
     const result = new Uint8Array(a.length + b.length);
     result.set(a, 0);
     result.set(b, a.length);

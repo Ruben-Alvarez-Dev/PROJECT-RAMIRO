@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
-import { SessionState, SessionType, MessageRole } from '@core/domain/enums';
+import { MessageRole, SessionState, type SessionType } from '@core/domain/enums';
 import type { Message, Session } from '@core/domain/types';
-import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
 import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
+import { useCallback, useState } from 'react';
 
 export interface UseSessionReturn {
   session: Session | null;
@@ -40,7 +40,7 @@ export function useSession(): UseSessionReturn {
 
   const updateState = useCallback((newState: SessionState) => {
     setState(newState);
-    setSession(prev => prev ? { ...prev, state: newState, updatedAt: new Date() } : null);
+    setSession((prev) => (prev ? { ...prev, state: newState, updatedAt: new Date() } : null));
   }, []);
 
   const addMessage = useCallback((role: MessageRole, content: string) => {
@@ -54,8 +54,10 @@ export function useSession(): UseSessionReturn {
       metadata: {},
       createdAt: new Date(),
     };
-    setMessages(prev => [...prev, msg]);
-    setSession(prev => prev ? { ...prev, messages: [...prev.messages, msg], updatedAt: new Date() } : null);
+    setMessages((prev) => [...prev, msg]);
+    setSession((prev) =>
+      prev ? { ...prev, messages: [...prev.messages, msg], updatedAt: new Date() } : null,
+    );
   }, []);
 
   const clearSession = useCallback(() => {

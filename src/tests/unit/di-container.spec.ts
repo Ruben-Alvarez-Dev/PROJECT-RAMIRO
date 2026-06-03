@@ -1,7 +1,7 @@
-# src/tests/unit/di-container.spec.ts
+// src/tests/unit/di-container.spec.ts
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import { DIContainer } from '@shared/di/container';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('DIContainer', () => {
   let container: DIContainer;
@@ -25,7 +25,7 @@ describe('DIContainer', () => {
     const second = container.resolve('factory');
 
     expect(first).toBe(second); // singleton
-    expect(callCount).toBe(1);  // factory called once
+    expect(callCount).toBe(1); // factory called once
   });
 
   it('should throw when resolving unregistered key', () => {

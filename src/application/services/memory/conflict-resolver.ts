@@ -2,10 +2,10 @@
 // Handles conflicting memories with conservative approach.
 // Rule: When in doubt, quarantine and ask the user (Ruben).
 
-export interface MemoryEntry {
+export interface ConflictEntry {
   id: string;
   content: string;
-  confidence: number;       // 0.0-1.0
+  confidence: number; // 0.0-1.0
   source: 'user' | 'consolidator' | 'model' | 'tool';
   createdAt: Date;
   updatedAt: Date;
@@ -22,7 +22,7 @@ export interface ConflictResolution {
 }
 
 export class ConflictResolver {
-  resolve(existing: MemoryEntry, incoming: MemoryEntry): ConflictResolution {
+  resolve(existing: ConflictEntry, incoming: ConflictEntry): ConflictResolution {
     // Rule 1: User-stated always wins over model-inferred
     if (existing.source === 'user' && incoming.source !== 'user') {
       return {
@@ -59,13 +59,23 @@ export class ConflictResolver {
     };
   }
 
-  areConflicting(a: MemoryEntry, b: MemoryEntry): boolean {
-    const tagOverlap = a.tags.filter(t => b.tags.includes(t)).length;
+  areConflicting(a: ConflictEntry, b: ConflictEntry): boolean {
+    const tagOverlap = a.tags.filter((t) => b.tags.includes(t)).length;
     if (a.category !== b.category && tagOverlap === 0) return false;
 
-    const wordsA = new Set(a.content.toLowerCase().split(/\s+/).filter(w => w.length > 3));
-    const wordsB = new Set(b.content.toLowerCase().split(/\s+/).filter(w => w.length > 3));
-    const intersection = [...wordsA].filter(w => wordsB.has(w));
+    const wordsA = new Set(
+      a.content
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 3),
+    );
+    const wordsB = new Set(
+      b.content
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 3),
+    );
+    const intersection = [...wordsA].filter((w) => wordsB.has(w));
     const union = new Set([...wordsA, ...wordsB]);
     const jaccard = union.size > 0 ? intersection.length / union.size : 0;
 

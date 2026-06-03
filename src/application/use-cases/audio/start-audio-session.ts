@@ -1,14 +1,13 @@
 // src/application/use-cases/audio/start-audio-session.ts
 
-import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
-import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
-import type { ISTTPort } from '@core/ports/output/stt.port';
-import type { ITTSPort } from '@core/ports/output/tts.port';
-import type { ILLMPort } from '@core/ports/output/llm.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
 import type { AudioConfig, LLMMessage } from '@core/domain/types';
 import { DEFAULT_AUDIO_CONFIG } from '@core/domain/value-objects/audio-config';
-import { MessageRole, TierLevel } from '@core/domain/enums';
+import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
+import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
+import type { ILLMPort } from '@core/ports/output/llm.port';
+import type { ISTTPort } from '@core/ports/output/stt.port';
+import type { ITTSPort } from '@core/ports/output/tts.port';
 
 export interface StartAudioSessionInput {
   readonly sessionId: string;
@@ -55,13 +54,20 @@ export class StartAudioSession {
           messages.push({ role: 'system', content: input.systemPrompt });
         }
         if (input.tier0Context) {
-          messages.push({ role: 'system', content: `[TIER 0 — Sacred Word]\n${input.tier0Context}` });
+          messages.push({
+            role: 'system',
+            content: `[TIER 0 — Sacred Word]\n${input.tier0Context}`,
+          });
         }
         messages.push({ role: 'user', content: transcript.text });
 
         this.eventBus.emit({
           type: 'audio.transcript.received',
-          payload: { sessionId: input.sessionId, text: transcript.text, confidence: transcript.confidence },
+          payload: {
+            sessionId: input.sessionId,
+            text: transcript.text,
+            confidence: transcript.confidence,
+          },
           timestamp: new Date(),
         });
 

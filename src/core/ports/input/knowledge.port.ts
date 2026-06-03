@@ -1,7 +1,7 @@
 // src/core/ports/input/knowledge.port.ts
 
-import type { Document, IndexResult, SearchResult, TierConfig } from '../../domain/types';
 import type { TierLevel } from '../../domain/enums';
+import type { Document, IndexResult, SearchResult, TierConfig } from '../../domain/types';
 
 export interface IKnowledgePort {
   indexDocument(doc: Document): Promise<IndexResult>;

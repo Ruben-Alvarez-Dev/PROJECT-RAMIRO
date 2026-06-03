@@ -1,5 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
-import { StreamType } from '@core/domain/enums';
+import { useCallback, useRef, useState } from 'react';
 
 export interface VideoSource {
   id: string;
@@ -28,13 +27,16 @@ export function useVideo(): UseVideoReturn {
   const [error, setError] = useState<string | null>(null);
   const streamsRef = useRef<Map<string, MediaStream>>(new Map());
 
-  const addSource = useCallback((type: VideoSource['type'], stream: MediaStream, name: string) => {
-    const id = `${type}-${Date.now()}`;
-    streamsRef.current.set(id, stream);
-    setSources(prev => [...prev, { id, name, type, stream }]);
-    setIsStreaming(true);
-    if (!focusedId) setFocusedId(id);
-  }, [focusedId]);
+  const addSource = useCallback(
+    (type: VideoSource['type'], stream: MediaStream, name: string) => {
+      const id = `${type}-${Date.now()}`;
+      streamsRef.current.set(id, stream);
+      setSources((prev) => [...prev, { id, name, type, stream }]);
+      setIsStreaming(true);
+      if (!focusedId) setFocusedId(id);
+    },
+    [focusedId],
+  );
 
   const startCamera = useCallback(async () => {
     try {
@@ -74,25 +76,28 @@ export function useVideo(): UseVideoReturn {
     }
   }, [addSource]);
 
-  const stopSource = useCallback((id: string) => {
-    const stream = streamsRef.current.get(id);
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      streamsRef.current.delete(id);
-    }
-    setSources(prev => {
-      const next = prev.filter(s => s.id !== id);
-      if (next.length === 0) setIsStreaming(false);
-      return next;
-    });
-    if (focusedId === id) {
-      setFocusedId(sources.find(s => s.id !== id)?.id ?? null);
-    }
-  }, [focusedId, sources]);
+  const stopSource = useCallback(
+    (id: string) => {
+      const stream = streamsRef.current.get(id);
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+        streamsRef.current.delete(id);
+      }
+      setSources((prev) => {
+        const next = prev.filter((s) => s.id !== id);
+        if (next.length === 0) setIsStreaming(false);
+        return next;
+      });
+      if (focusedId === id) {
+        setFocusedId(sources.find((s) => s.id !== id)?.id ?? null);
+      }
+    },
+    [focusedId, sources],
+  );
 
   const stopAll = useCallback(() => {
     for (const [, stream] of streamsRef.current) {
-      stream.getTracks().forEach(t => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
     }
     streamsRef.current.clear();
     setSources([]);
@@ -104,5 +109,16 @@ export function useVideo(): UseVideoReturn {
     setFocusedId(id);
   }, []);
 
-  return { isStreaming, sources, focusedId, error, startCamera, startScreen, startWindow, stopSource, stopAll, focusSource };
+  return {
+    isStreaming,
+    sources,
+    focusedId,
+    error,
+    startCamera,
+    startScreen,
+    startWindow,
+    stopSource,
+    stopAll,
+    focusSource,
+  };
 }

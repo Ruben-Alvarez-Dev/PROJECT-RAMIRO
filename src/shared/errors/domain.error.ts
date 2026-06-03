@@ -28,11 +28,7 @@ export class AdapterError extends DomainError {
 
 export class ModelNotAvailableError extends DomainError {
   constructor(provider: string, model: string) {
-    super(
-      `Model not available: ${provider}/${model}`,
-      'MODEL_NOT_AVAILABLE',
-      { provider, model },
-    );
+    super(`Model not available: ${provider}/${model}`, 'MODEL_NOT_AVAILABLE', { provider, model });
   }
 }
 
@@ -53,18 +49,20 @@ export class KnowledgeError extends DomainError {
 }
 
 export class SessionError extends DomainError {
-  constructor(message: string, public readonly sessionId: string) {
+  constructor(
+    message: string,
+    public readonly sessionId: string,
+  ) {
     super(message, 'SESSION_ERROR', { sessionId });
   }
 }
 
 export class ContextOverflowError extends DomainError {
   constructor(currentTokens: number, maxTokens: number) {
-    super(
-      `Context overflow: ${currentTokens}/${maxTokens} tokens`,
-      'CONTEXT_OVERFLOW',
-      { currentTokens, maxTokens },
-    );
+    super(`Context overflow: ${currentTokens}/${maxTokens} tokens`, 'CONTEXT_OVERFLOW', {
+      currentTokens,
+      maxTokens,
+    });
   }
 }
 

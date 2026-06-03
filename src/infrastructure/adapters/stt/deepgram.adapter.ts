@@ -1,14 +1,12 @@
 // src/infrastructure/adapters/stt/deepgram.adapter.ts
 // Cloud STT fallback via Deepgram Nova-2
 
-import type { ISTTPort } from '@core/ports/output/stt.port';
 import type { AudioBuffer, AudioFrame, Transcript, TranscriptChunk } from '@core/domain/types';
-import { Logger } from '@shared/logging/logger';
+import type { ISTTPort } from '@core/ports/output/stt.port';
 import { AdapterError } from '@shared/errors/domain.error';
 
 export class DeepgramAdapter implements ISTTPort {
-  private readonly logger = new Logger('Deepgram');
-  private language: string = 'es';
+  private language = 'es';
   private ws: WebSocket | null = null;
 
   constructor(
@@ -32,8 +30,10 @@ export class DeepgramAdapter implements ISTTPort {
       throw new AdapterError(`Deepgram API error: ${response.status}`, 'deepgram');
     }
 
-    const data = await response.json() as {
-      results: { channels: Array<{ alternatives: Array<{ transcript: string; confidence: number }> }> };
+    const data = (await response.json()) as {
+      results: {
+        channels: Array<{ alternatives: Array<{ transcript: string; confidence: number }> }>;
+      };
     };
 
     const alt = data.results.channels[0]?.alternatives[0];
@@ -153,7 +153,7 @@ export class DeepgramAdapter implements ISTTPort {
     let offset = 44;
     for (let i = 0; i < audio.data.length; i++) {
       const sample = Math.max(-1, Math.min(1, audio.data[i]!));
-      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
       offset += 2;
     }
 

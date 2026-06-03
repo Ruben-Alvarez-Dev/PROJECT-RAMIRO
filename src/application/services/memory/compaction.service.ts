@@ -3,22 +3,22 @@
 // Layer 1: Snip old tool results (>6 turns old, keep first half + last quarter)
 // Layer 2: Auto-compact when context exceeds 70% (summarize old via LLM)
 
-import type { ILLMPort } from '@core/ports/output/llm.port';
 import type { LLMMessage } from '@core/domain/types';
+import type { ILLMPort } from '@core/ports/output/llm.port';
 import { Logger } from '@shared/logging/logger';
 
 export interface CompactionConfig {
-  readonly contextLimit: number;           // 128000 tokens
-  readonly snipThresholdRatio: number;     // 0.70 = trigger at 70%
-  readonly keepRatio: number;              // 0.30 = keep 30% recent after compact
-  readonly snipMaxChars: number;           // 2000 chars before snipping
-  readonly preserveLastNTurns: number;     // 6 turns always preserved
+  readonly contextLimit: number; // 128000 tokens
+  readonly snipThresholdRatio: number; // 0.70 = trigger at 70%
+  readonly keepRatio: number; // 0.30 = keep 30% recent after compact
+  readonly snipMaxChars: number; // 2000 chars before snipping
+  readonly preserveLastNTurns: number; // 6 turns always preserved
 }
 
 export const DEFAULT_COMPACTION_CONFIG: CompactionConfig = {
   contextLimit: 128_000,
-  snipThresholdRatio: 0.70,
-  keepRatio: 0.30,
+  snipThresholdRatio: 0.7,
+  keepRatio: 0.3,
   snipMaxChars: 2000,
   preserveLastNTurns: 6,
 };
@@ -68,14 +68,22 @@ export class CompactionService {
     return Math.floor(this.config.contextLimit * this.config.snipThresholdRatio);
   }
 
-  async compact(messages: LLMMessage[]): Promise<{ messages: LLMMessage[]; result: CompactionResult }> {
+  async compact(
+    messages: LLMMessage[],
+  ): Promise<{ messages: LLMMessage[]; result: CompactionResult }> {
     const tokensBefore = this.estimateTokens(messages);
     const threshold = this.getThreshold();
 
     if (tokensBefore <= threshold) {
       return {
         messages,
-        result: { didCompact: false, didSnip: false, tokensBefore, tokensAfter: tokensBefore, messagesRemoved: 0 },
+        result: {
+          didCompact: false,
+          didSnip: false,
+          tokensBefore,
+          tokensAfter: tokensBefore,
+          messagesRemoved: 0,
+        },
       };
     }
 
@@ -87,7 +95,13 @@ export class CompactionService {
       this.logger.info('Layer 1 snip sufficient', { before: tokensBefore, after: tokensAfterSnip });
       return {
         messages: afterSnip,
-        result: { didCompact: false, didSnip: true, tokensBefore, tokensAfter: tokensAfterSnip, messagesRemoved: 0 },
+        result: {
+          didCompact: false,
+          didSnip: true,
+          tokensBefore,
+          tokensAfter: tokensAfterSnip,
+          messagesRemoved: 0,
+        },
       };
     }
 
@@ -95,11 +109,21 @@ export class CompactionService {
     const { compacted, removed } = await this.autoCompact(afterSnip);
     const tokensAfter = this.estimateTokens(compacted);
 
-    this.logger.info('Layer 2 compact complete', { before: tokensBefore, after: tokensAfter, removed });
+    this.logger.info('Layer 2 compact complete', {
+      before: tokensBefore,
+      after: tokensAfter,
+      removed,
+    });
 
     return {
       messages: compacted,
-      result: { didCompact: true, didSnip: true, tokensBefore, tokensAfter, messagesRemoved: removed },
+      result: {
+        didCompact: true,
+        didSnip: true,
+        tokensBefore,
+        tokensAfter,
+        messagesRemoved: removed,
+      },
     };
   }
 
@@ -117,7 +141,10 @@ export class CompactionService {
         const firstHalf = m.content.slice(0, half);
         const lastQuarter = m.content.slice(-quarter);
         const snipped = m.content.length - half - quarter;
-        result[i] = { ...m, content: `${firstHalf}\n[... ${snipped} chars snipped ...]\n${lastQuarter}` };
+        result[i] = {
+          ...m,
+          content: `${firstHalf}\n[... ${snipped} chars snipped ...]\n${lastQuarter}`,
+        };
       }
     }
 
@@ -125,7 +152,9 @@ export class CompactionService {
   }
 
   // Layer 2: Summarize old messages via LLM
-  private async autoCompact(messages: LLMMessage[]): Promise<{ compacted: LLMMessage[]; removed: number }> {
+  private async autoCompact(
+    messages: LLMMessage[],
+  ): Promise<{ compacted: LLMMessage[]; removed: number }> {
     const split = this.findSplitPoint(messages);
     if (split <= 0) return { compacted: messages, removed: 0 };
 
@@ -144,7 +173,11 @@ export class CompactionService {
     let summary = '';
     for await (const chunk of this.llm.chat({
       messages: [
-        { role: 'system', content: 'You are a concise summarizer. Summarize the following conversation history preserving key decisions, file paths, tool results, and context needed to continue. Be brief but complete.' },
+        {
+          role: 'system',
+          content:
+            'You are a concise summarizer. Summarize the following conversation history preserving key decisions, file paths, tool results, and context needed to continue. Be brief but complete.',
+        },
         { role: 'user', content: transcript },
       ],
       stream: true,
@@ -160,7 +193,7 @@ export class CompactionService {
     };
     const ackMsg: LLMMessage = {
       role: 'assistant',
-      content: 'Understood. I have the context from the previous conversation. Let\'s continue.',
+      content: "Understood. I have the context from the previous conversation. Let's continue.",
     };
 
     return {

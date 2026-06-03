@@ -1,18 +1,26 @@
-# src/tests/unit/context-manager.spec.ts
+// src/tests/unit/context-manager.spec.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ContextManager } from '@application/services/context-manager.service';
-import type { IKnowledgePort } from '@core/ports/input/knowledge.port';
-import type { Message } from '@core/domain/types';
 import { MessageRole, TierLevel } from '@core/domain/enums';
+import type { Message } from '@core/domain/types';
 import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import type { IKnowledgePort } from '@core/ports/input/knowledge.port';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('ContextManager', () => {
   const mockKnowledge: IKnowledgePort = {
     indexDocument: vi.fn(),
-    search: vi.fn().mockResolvedValue([
-      { documentId: 'doc-1', title: 'Test Doc', chunk: 'Test content', score: 0.9, tier: TierLevel.CORE },
-    ]),
+    search: vi
+      .fn()
+      .mockResolvedValue([
+        {
+          documentId: 'doc-1',
+          title: 'Test Doc',
+          chunk: 'Test content',
+          score: 0.9,
+          tier: TierLevel.CORE,
+        },
+      ]),
     getDocument: vi.fn(),
     deleteDocument: vi.fn(),
     getTierConfig: vi.fn(),
@@ -27,7 +35,13 @@ describe('ContextManager', () => {
 
   it('should assemble context with TIER 0 when paths are configured', async () => {
     (mockKnowledge.search as any).mockResolvedValueOnce([
-      { documentId: 'tier0-doc', title: 'Sacred Doc', chunk: 'Sacred content here', score: 1.0, tier: TierLevel.SACRED },
+      {
+        documentId: 'tier0-doc',
+        title: 'Sacred Doc',
+        chunk: 'Sacred content here',
+        score: 1.0,
+        tier: TierLevel.SACRED,
+      },
     ]);
 
     const config = { ...DEFAULT_KNOWLEDGE_CONFIG, tier0Paths: ['/path/to/sacred.md'] };
@@ -38,7 +52,12 @@ describe('ContextManager', () => {
   });
 
   it('should include TIER 1 results from knowledge search', async () => {
-    const result = await manager.assembleContext(DEFAULT_KNOWLEDGE_CONFIG, 'test query', [], 100_000);
+    const result = await manager.assembleContext(
+      DEFAULT_KNOWLEDGE_CONFIG,
+      'test query',
+      [],
+      100_000,
+    );
 
     expect(result).toContain('[TIER 1');
     expect(result).toContain('Test Doc');
@@ -56,7 +75,12 @@ describe('ContextManager', () => {
       createdAt: new Date(Date.now() - (20 - i) * 60000),
     }));
 
-    const result = await manager.assembleContext(DEFAULT_KNOWLEDGE_CONFIG, 'current message', messages, 100_000);
+    const result = await manager.assembleContext(
+      DEFAULT_KNOWLEDGE_CONFIG,
+      'current message',
+      messages,
+      100_000,
+    );
 
     expect(result).toContain('[TIER 2');
     expect(result).toContain('[Earlier context]');
@@ -64,7 +88,12 @@ describe('ContextManager', () => {
   });
 
   it('should always include current message as TIER 3', async () => {
-    const result = await manager.assembleContext(DEFAULT_KNOWLEDGE_CONFIG, 'What is React?', [], 100_000);
+    const result = await manager.assembleContext(
+      DEFAULT_KNOWLEDGE_CONFIG,
+      'What is React?',
+      [],
+      100_000,
+    );
 
     expect(result).toContain('[TIER 3');
     expect(result).toContain('What is React?');

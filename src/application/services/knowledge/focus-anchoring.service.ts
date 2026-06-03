@@ -6,18 +6,18 @@
 import { Logger } from '@shared/logging/logger';
 
 export interface TopicAnchor {
-  readonly mainTopic: string;          // e.g. "Constitución Española"
-  readonly subTopic: string;           // e.g. "Artículo 15 - Derecho a la vida"
+  readonly mainTopic: string; // e.g. "Constitución Española"
+  readonly subTopic: string; // e.g. "Artículo 15 - Derecho a la vida"
   readonly keywords: readonly string[];
-  readonly confidence: number;         // 0.0-1.0
-  readonly detectedAt: number;         // timestamp
-  readonly messageCount: number;       // how many messages about this topic
+  readonly confidence: number; // 0.0-1.0
+  readonly detectedAt: number; // timestamp
+  readonly messageCount: number; // how many messages about this topic
 }
 
 export interface FocusScore {
-  readonly originalScore: number;      // from Qdrant
-  readonly boostedScore: number;       // after focus anchoring
-  readonly boost: number;              // multiplier applied
+  readonly originalScore: number; // from Qdrant
+  readonly boostedScore: number; // after focus anchoring
+  readonly boost: number; // multiplier applied
   readonly reason: string;
 }
 
@@ -37,9 +37,13 @@ export class FocusAnchoringService {
     if (keywords.length === 0) return;
 
     if (this.currentAnchor) {
-      // Check if same topic (keyword overlap > 50%)
-      const overlap = keywords.filter(k => this.currentAnchor!.keywords.includes(k)).length;
-      const overlapRatio = overlap / Math.max(keywords.length, this.currentAnchor!.keywords.length);
+      // Check if same topic via overlap coefficient: how much of the smaller
+      // keyword set is contained in the other. This treats a follow-up message
+      // that mentions a subset of the active topic as "same topic" (reinforce),
+      // rather than penalising it for being shorter (as max-denominator would).
+      const anchorKeywords = this.currentAnchor.keywords;
+      const overlap = keywords.filter((k) => anchorKeywords.includes(k)).length;
+      const overlapRatio = overlap / Math.min(keywords.length, anchorKeywords.length);
 
       if (overlapRatio > 0.5) {
         // Same topic, reinforce
@@ -77,7 +81,7 @@ export class FocusAnchoringService {
     }
 
     const docLower = documentText.toLowerCase();
-    const matchCount = this.currentAnchor.keywords.filter(k => docLower.includes(k)).length;
+    const matchCount = this.currentAnchor.keywords.filter((k) => docLower.includes(k)).length;
     const matchRatio = matchCount / this.currentAnchor.keywords.length;
 
     if (matchRatio < 0.1) {
@@ -117,12 +121,60 @@ export class FocusAnchoringService {
 
   private extractKeywords(text: string): string[] {
     // Extract meaningful words (>4 chars, not stopwords)
-    const stopwords = new Set(['como', 'para', 'pero', 'porque', 'esta', 'esto', 'esta', 'como', 'más', 'muy', 'también', 'puede', 'donde', 'cuando', 'desde', 'hasta', 'sobre', 'entre', 'todo', 'todos', 'todas', 'cada', 'otro', 'otra', 'otros', 'otras', 'the', 'and', 'for', 'but', 'not', 'with', 'this', 'that', 'from', 'have', 'been', 'will', 'would', 'could', 'should', 'what', 'when', 'where', 'how', 'why']);
-    
-    return text.toLowerCase()
+    const stopwords = new Set([
+      'como',
+      'para',
+      'pero',
+      'porque',
+      'esta',
+      'esto',
+      'esta',
+      'como',
+      'más',
+      'muy',
+      'también',
+      'puede',
+      'donde',
+      'cuando',
+      'desde',
+      'hasta',
+      'sobre',
+      'entre',
+      'todo',
+      'todos',
+      'todas',
+      'cada',
+      'otro',
+      'otra',
+      'otros',
+      'otras',
+      'the',
+      'and',
+      'for',
+      'but',
+      'not',
+      'with',
+      'this',
+      'that',
+      'from',
+      'have',
+      'been',
+      'will',
+      'would',
+      'could',
+      'should',
+      'what',
+      'when',
+      'where',
+      'how',
+      'why',
+    ]);
+
+    return text
+      .toLowerCase()
       .replace(/[^\w\sáéíóúñü]/g, ' ')
       .split(/\s+/)
-      .filter(w => w.length > 4 && !stopwords.has(w))
+      .filter((w) => w.length > 4 && !stopwords.has(w))
       .slice(0, 10);
   }
 }

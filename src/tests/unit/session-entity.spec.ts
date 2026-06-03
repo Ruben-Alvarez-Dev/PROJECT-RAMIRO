@@ -1,10 +1,17 @@
 // src/tests/unit/session-entity.spec.ts
 
-import { describe, it, expect } from 'vitest';
-import { SessionState, SessionType, MessageRole, TierLevel } from '@core/domain/enums';
-import type { Session, Message } from '@core/domain/types';
-import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
+import {
+  MessageRole,
+  SessionState,
+  SessionType,
+  StreamStatus,
+  StreamType,
+  TierLevel,
+} from '@core/domain/enums';
+import type { Message, Session, StreamSource } from '@core/domain/types';
 import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
+import { describe, expect, it } from 'vitest';
 
 describe('Session Entity', () => {
   const createSession = (overrides?: Partial<Session>): Session => ({
@@ -73,12 +80,20 @@ describe('Session Entity', () => {
   });
 
   it('should support multiple sources up to 4', () => {
-    const sources = Array.from({ length: 4 }, (_, i) => ({
+    const sources = Array.from({ length: 4 }, (_, i): StreamSource => ({
       id: `source-${i}`,
-      type: i % 2 === 0 ? 'video_camera' as const : 'audio_input' as const,
+      type: i % 2 === 0 ? StreamType.VIDEO_CAMERA : StreamType.AUDIO_INPUT,
       name: `Source ${i}`,
-      config: { sampleRate: 24000, channels: 1, bitDepth: 16, codec: 'opus' as const, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      status: 'active' as const,
+      config: {
+        sampleRate: 24000,
+        channels: 1,
+        bitDepth: 16,
+        codec: 'opus' as const,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+      status: StreamStatus.ACTIVE,
       priority: i + 1,
     }));
 

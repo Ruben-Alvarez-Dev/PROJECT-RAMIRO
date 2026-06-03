@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
 import { TierLevel } from '@core/domain/enums';
+import { useCallback, useState } from 'react';
 
 export interface KnowledgeResult {
   documentId: string;

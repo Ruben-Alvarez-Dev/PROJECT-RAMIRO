@@ -1,9 +1,9 @@
 // src/application/use-cases/audio/stop-audio-session.ts
 
-import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
-import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
 import type { StreamHandle } from '@core/domain/types';
+import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
+import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
 
 export interface StopAudioSessionInput {
   readonly sessionId: string;

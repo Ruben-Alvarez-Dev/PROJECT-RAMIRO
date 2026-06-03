@@ -1,7 +1,7 @@
-// src/presentation/shared/components/MessageBubble/MessageBubble.tsx
-import React from 'react';
-import type { Message } from '@core/domain/types';
 import { MessageRole } from '@core/domain/enums';
+import type { Message } from '@core/domain/types';
+// src/presentation/shared/components/MessageBubble/MessageBubble.tsx
+import type React from 'react';
 import './MessageBubble.scss';
 
 export interface MessageBubbleProps {
@@ -16,11 +16,7 @@ const AVATAR_LABELS: Record<string, string> = {
 };
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, className = '' }) => {
-  const classNames = [
-    'ramiro-message',
-    `ramiro-message--${message.role}`,
-    className,
-  ]
+  const classNames = ['ramiro-message', `ramiro-message--${message.role}`, className]
     .filter(Boolean)
     .join(' ');
 

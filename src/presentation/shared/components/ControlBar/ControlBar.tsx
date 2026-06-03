@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button } from '../Button';
-import { AudioWaveform } from '../AudioWaveform';
-import { ModelSwitch, type ModelMode } from '../ModelSwitch';
 import type { AudioPipelineState } from '@application/services/audio/audio-pipeline.service';
+import type React from 'react';
+import { AudioWaveform } from '../AudioWaveform';
+import { Button } from '../Button';
+import { type ModelMode, ModelSwitch } from '../ModelSwitch';
 import './ControlBar.scss';
 
 export interface ControlBarProps {
@@ -60,7 +60,9 @@ export const ControlBar: React.FC<ControlBarProps> = ({
             >
               {pipelineState.status === 'listening' ? '🔴' : '🎤'}
             </button>
-            <AudioWaveform isActive={pipelineState.status === 'listening' || pipelineState.status === 'speaking'} />
+            <AudioWaveform
+              isActive={pipelineState.status === 'listening' || pipelineState.status === 'speaking'}
+            />
             <ModelSwitch value={modelMode} onChange={onModelModeChange} />
             <Button variant="ghost" size="sm" onClick={onStop}>
               ⏹ Stop
@@ -68,8 +70,12 @@ export const ControlBar: React.FC<ControlBarProps> = ({
           </>
         ) : (
           <>
-            <Button variant="primary" onClick={onStartVoice}>🎤 Voice</Button>
-            <Button variant="secondary" onClick={onStartVideo}>📹 Video</Button>
+            <Button variant="primary" onClick={onStartVoice}>
+              🎤 Voice
+            </Button>
+            <Button variant="secondary" onClick={onStartVideo}>
+              📹 Video
+            </Button>
             <ModelSwitch value={modelMode} onChange={onModelModeChange} />
           </>
         )}
@@ -77,7 +83,9 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 
       <div className="ramiro-control-bar__right">
         {latencyMs > 0 && (
-          <span className={`ramiro-control-bar__latency ramiro-control-bar__latency--${latencyClass}`}>
+          <span
+            className={`ramiro-control-bar__latency ramiro-control-bar__latency--${latencyClass}`}
+          >
             {Math.round(latencyMs)}ms
           </span>
         )}

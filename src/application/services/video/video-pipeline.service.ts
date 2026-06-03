@@ -2,16 +2,18 @@
 // Full video pipeline: 1-4 sources → FrameSampler → DualModelProcessor (OMNI+PRO) → TTS
 // Supports camera, screen, window, app, and OBS sources simultaneously.
 
-import type { IVideoInputPort } from '@core/ports/input/video-input.port';
-import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
-import type { ISTTPort } from '@core/ports/output/stt.port';
-import type { ITTSPort } from '@core/ports/output/tts.port';
-import type { ILLMPort } from '@core/ports/output/llm.port';
+import type { LLMMessage } from '@core/domain/types';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { StreamHandle, LLMMessage } from '@core/domain/types';
-import { FrameSampler, type SampledFrame, type FrameSamplerConfig } from './frame-sampler';
-import { DualModelProcessor, type DualProcessorConfig, type DualProcessResult } from './dual-model-processor';
+import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
+import type { ILLMPort } from '@core/ports/output/llm.port';
+import type { ITTSPort } from '@core/ports/output/tts.port';
 import { Logger } from '@shared/logging/logger';
+import {
+  DualModelProcessor,
+  type DualProcessResult,
+  type DualProcessorConfig,
+} from './dual-model-processor';
+import { FrameSampler } from './frame-sampler';
 
 export interface VideoPipelineConfig {
   readonly sources: VideoSourceInput[];
@@ -45,7 +47,6 @@ export class VideoPipelineService {
   private readonly sampler: FrameSampler;
   private readonly processor: DualModelProcessor;
   private readonly stateCallbacks: Set<VideoStateCallback> = new Set();
-  private readonly sourceHandles = new Map<string, string>(); // sourceId → handleId
   private currentState: VideoPipelineState = {
     status: 'idle',
     activeSources: 0,
@@ -57,12 +58,10 @@ export class VideoPipelineService {
   private totalFrames = 0;
 
   constructor(
-    private readonly videoInput: IVideoInputPort,
     private readonly audioOutput: IAudioOutputPort,
-    private readonly stt: ISTTPort,
     private readonly tts: ITTSPort,
-    private readonly omni: ILLMPort,
-    private readonly pro: ILLMPort,
+    omni: ILLMPort,
+    pro: ILLMPort,
     private readonly eventBus: IEventBus,
   ) {
     this.sampler = new FrameSampler();
@@ -108,10 +107,8 @@ export class VideoPipelineService {
       this.logger.info('Source added', { id: source.id, type: source.type, name: source.name });
     }
 
-    // Set FPS if provided
+    // Set FPS if provided — apply to all sources
     if (config.fpsPerSource) {
-      const samplerConfig: Partial<FrameSamplerConfig> = { fpsPerSource: config.fpsPerSource };
-      // Apply to all sources
       for (const source of config.sources) {
         this.sampler.setFPS(source.id, config.fpsPerSource);
       }
@@ -149,14 +146,16 @@ export class VideoPipelineService {
 
         // Auto-cleanup conversation history (keep last 20 messages + system)
         if (this.conversationHistory.length > 22) {
-          const systemMsgs = this.conversationHistory.filter(m => m.role === 'system');
-          const recentMsgs = this.conversationHistory
-            .filter(m => m.role !== 'system')
-            .slice(-20);
+          const systemMsgs = this.conversationHistory.filter((m) => m.role === 'system');
+          const recentMsgs = this.conversationHistory.filter((m) => m.role !== 'system').slice(-20);
           this.conversationHistory = [...systemMsgs, ...recentMsgs];
         }
 
-        this.updateState({ status: 'streaming', lastResult: result, totalFrames: this.totalFrames });
+        this.updateState({
+          status: 'streaming',
+          lastResult: result,
+          totalFrames: this.totalFrames,
+        });
 
         // Auto-speak if enabled
         if (config.autoSpeak && result.mergedResponse) {
@@ -181,7 +180,10 @@ export class VideoPipelineService {
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Processing error';
         this.updateState({ status: 'error', error: message });
-        this.logger.error('Pipeline cycle error', error instanceof Error ? error : new Error(message));
+        this.logger.error(
+          'Pipeline cycle error',
+          error instanceof Error ? error : new Error(message),
+        );
         // Auto-recover to streaming state after error
         setTimeout(() => {
           if (this.isRunning) this.updateState({ status: 'streaming', error: undefined });
@@ -237,7 +239,9 @@ export class VideoPipelineService {
   private updateState(partial: Partial<VideoPipelineState>): void {
     this.currentState = { ...this.currentState, ...partial };
     for (const cb of this.stateCallbacks) {
-      try { cb(this.currentState); } catch {}
+      try {
+        cb(this.currentState);
+      } catch {}
     }
   }
 }

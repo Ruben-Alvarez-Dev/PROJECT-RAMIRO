@@ -1,6 +1,6 @@
 // src/core/ports/output/audio-output.port.ts
 
-import type { AudioBuffer, VoiceConfig, VoiceInfo } from '../../domain/types';
+import type { AudioBuffer } from '../../domain/types';
 
 export interface IAudioOutputPort {
   play(audio: AudioBuffer): Promise<void>;

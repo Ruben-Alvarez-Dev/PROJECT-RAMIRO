@@ -1,7 +1,7 @@
-# src/tests/unit/vad-processor.spec.ts
+// src/tests/unit/vad-processor.spec.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { VADProcessor, VADState, DEFAULT_VAD_CONFIG } from '@application/services/audio/vad-processor';
+import { VADProcessor, VADState } from '@application/services/audio/vad-processor';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('VADProcessor', () => {
   let vad: VADProcessor;
@@ -29,7 +29,7 @@ describe('VADProcessor', () => {
       vad.processFrame(speechFrame, i * 20);
     }
 
-    expect(events.some(e => e.state === VADState.SPEECH)).toBe(true);
+    expect(events.some((e) => e.state === VADState.SPEECH)).toBe(true);
   });
 
   it('should not trigger speech on silence', () => {
@@ -47,7 +47,7 @@ describe('VADProcessor', () => {
       vad.processFrame(silenceFrame, i * 20);
     }
 
-    expect(events.some(e => e.state === VADState.SPEECH)).toBe(false);
+    expect(events.some((e) => e.state === VADState.SPEECH)).toBe(false);
     expect(vad.getState()).toBe(VADState.SILENCE);
   });
 
@@ -77,7 +77,7 @@ describe('VADProcessor', () => {
       vad.processFrame(silenceFrame, i * 20);
     }
 
-    const endOfSpeech = events.find(e => e.state === VADState.END_OF_SPEECH);
+    const endOfSpeech = events.find((e) => e.state === VADState.END_OF_SPEECH);
     expect(endOfSpeech).toBeDefined();
     expect(endOfSpeech?.audioSegment).toBeDefined();
     expect(endOfSpeech!.audioSegment!.length).toBeGreaterThan(0);
@@ -139,7 +139,7 @@ describe('VADProcessor', () => {
       vad.processFrame(silenceFrame, i * 20);
     }
 
-    const endOfSpeech = events.find(e => e.state === VADState.END_OF_SPEECH);
+    const endOfSpeech = events.find((e) => e.state === VADState.END_OF_SPEECH);
     expect(endOfSpeech).toBeDefined();
     // Audio segment should include pre-speech buffer
     expect(endOfSpeech!.audioSegment!.length).toBeGreaterThan(480 * 20); // At least 20 frames

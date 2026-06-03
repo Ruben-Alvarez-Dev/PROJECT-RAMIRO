@@ -1,5 +1,6 @@
 // src/presentation/shared/components/AudioWaveform/AudioWaveform.tsx
-import React, { useRef, useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './AudioWaveform.scss';
 
 export interface AudioWaveformProps {

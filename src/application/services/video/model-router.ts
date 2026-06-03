@@ -1,9 +1,3 @@
-// src/application/services/video/model-router.ts
-// Routing rules for OMNI vs PRO models.
-// Supports user override via ModelSwitch (AUTO/OMNI/PRO/BOTH).
-
-import type { SampledFrame } from './frame-sampler';
-import { Logger } from '@shared/logging/logger';
 
 export type ModelMode = 'auto' | 'omni' | 'pro' | 'both';
 
@@ -25,7 +19,6 @@ export interface RoutingResult {
   readonly proPrompt: string;
 }
 
-const logger = new Logger('ModelRouter');
 
 export function decideRoute(ctx: RoutingContext): RoutingResult {
   // User override: explicit mode wins always

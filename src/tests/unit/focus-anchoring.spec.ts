@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { FocusAnchoringService } from '@application/services/knowledge/focus-anchoring.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('FocusAnchoringService', () => {
   let service: FocusAnchoringService;
@@ -33,7 +33,10 @@ describe('FocusAnchoringService', () => {
 
   it('should boost scores for topic-relevant documents', () => {
     service.updateTopic('Constitución Española Artículo 15 derechos fundamentales vida');
-    const score = service.scoreResult(0.5, 'El artículo 15 de la Constitución Española reconoce el derecho a la vida');
+    const score = service.scoreResult(
+      0.5,
+      'El artículo 15 de la Constitución Española reconoce el derecho a la vida',
+    );
     expect(score.boostedScore).toBeGreaterThan(score.originalScore);
     expect(score.boost).toBeGreaterThan(1.0);
   });

@@ -3,11 +3,11 @@
 // Production: replace with Silero VAD ONNX model for ML-based detection.
 
 export interface VADConfig {
-  readonly energyThreshold: number;     // 0.0 - 1.0, default 0.02
+  readonly energyThreshold: number; // 0.0 - 1.0, default 0.02
   readonly zeroCrossingThreshold: number; // max crossings per frame for speech
-  readonly minSpeechDurationMs: number;   // minimum speech segment duration
-  readonly minSilenceDurationMs: number;  // minimum silence to trigger end-of-speech
-  readonly preSpeechBufferMs: number;     // audio to keep before speech detection
+  readonly minSpeechDurationMs: number; // minimum speech segment duration
+  readonly minSilenceDurationMs: number; // minimum silence to trigger end-of-speech
+  readonly preSpeechBufferMs: number; // audio to keep before speech detection
 }
 
 export const DEFAULT_VAD_CONFIG: VADConfig = {
@@ -34,8 +34,7 @@ export interface VADEvent {
 export class VADProcessor {
   private config: VADConfig;
   private state: VADState = VADState.SILENCE;
-  private speechStartTime: number = 0;
-  private silenceStartTime: number = 0;
+  private speechStartTime = 0;
   private preBuffer: Float32Array[] = [];
   private speechBuffer: Float32Array[] = [];
   private readonly callbacks: Set<(event: VADEvent) => void> = new Set();
@@ -51,7 +50,8 @@ export class VADProcessor {
   processFrame(frame: Float32Array, timestamp: number): void {
     const energy = this.calculateEnergy(frame);
     const zeroCrossing = this.calculateZeroCrossing(frame);
-    const isSpeech = energy > this.config.energyThreshold && zeroCrossing < this.config.zeroCrossingThreshold;
+    const isSpeech =
+      energy > this.config.energyThreshold && zeroCrossing < this.config.zeroCrossingThreshold;
     const confidence = Math.min(1, energy / this.config.energyThreshold);
 
     // Maintain pre-speech buffer (ring buffer of last N ms)
@@ -76,8 +76,7 @@ export class VADProcessor {
         this.speechBuffer.push(frame);
         if (!isSpeech) {
           if (timestamp - this.speechStartTime > this.config.minSpeechDurationMs) {
-            // Enough speech recorded, now tracking silence
-            this.silenceStartTime = timestamp;
+            // Enough speech recorded — emit end-of-speech immediately.
             this.state = VADState.SILENCE;
             this.emit({
               state: VADState.END_OF_SPEECH,
@@ -87,9 +86,6 @@ export class VADProcessor {
             });
             this.speechBuffer = [];
           }
-        } else {
-          // Reset silence timer if speech continues
-          this.silenceStartTime = 0;
         }
         break;
     }
@@ -100,7 +96,6 @@ export class VADProcessor {
     this.speechBuffer = [];
     this.preBuffer = [];
     this.speechStartTime = 0;
-    this.silenceStartTime = 0;
   }
 
   getState(): VADState {
@@ -118,7 +113,7 @@ export class VADProcessor {
   private calculateZeroCrossing(frame: Float32Array): number {
     let crossings = 0;
     for (let i = 1; i < frame.length; i++) {
-      if ((frame[i]! >= 0) !== (frame[i - 1]! >= 0)) crossings++;
+      if (frame[i]! >= 0 !== frame[i - 1]! >= 0) crossings++;
     }
     return crossings;
   }
@@ -136,7 +131,11 @@ export class VADProcessor {
 
   private emit(event: VADEvent): void {
     for (const cb of this.callbacks) {
-      try { cb(event); } catch (e) { console.error('VAD callback error:', e); }
+      try {
+        cb(event);
+      } catch (e) {
+        console.error('VAD callback error:', e);
+      }
     }
   }
 }

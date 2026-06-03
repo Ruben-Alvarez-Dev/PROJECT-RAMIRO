@@ -1,14 +1,14 @@
-# src/tests/unit/memory-service.spec.ts
+// src/tests/unit/memory-service.spec.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryService } from '@application/services/memory.service';
+import { MessageRole, SessionState, SessionType, TierLevel } from '@core/domain/enums';
+import type { MemoryEntry, Message, Session } from '@core/domain/types';
+import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
 import type { IStoragePort } from '@core/ports/output/storage.port';
 import type { IVectorPort } from '@core/ports/output/vector.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { Message, Session, MemoryEntry } from '@core/domain/types';
-import { MessageRole, SessionState, SessionType, TierLevel } from '@core/domain/enums';
-import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
-import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('MemoryService', () => {
   const mockStorage: IStoragePort = {
@@ -42,14 +42,34 @@ describe('MemoryService', () => {
 
   it('should save session messages to storage', async () => {
     const messages: Message[] = [
-      { id: 'msg-1', role: MessageRole.USER, content: 'Hello', model: 'user', tier: TierLevel.DYNAMIC, tokenCount: 1, metadata: {}, createdAt: new Date() },
-      { id: 'msg-2', role: MessageRole.ASSISTANT, content: 'Hi there', model: 'mimo', tier: TierLevel.DYNAMIC, tokenCount: 2, metadata: {}, createdAt: new Date() },
+      {
+        id: 'msg-1',
+        role: MessageRole.USER,
+        content: 'Hello',
+        model: 'user',
+        tier: TierLevel.DYNAMIC,
+        tokenCount: 1,
+        metadata: {},
+        createdAt: new Date(),
+      },
+      {
+        id: 'msg-2',
+        role: MessageRole.ASSISTANT,
+        content: 'Hi there',
+        model: 'mimo',
+        tier: TierLevel.DYNAMIC,
+        tokenCount: 2,
+        metadata: {},
+        createdAt: new Date(),
+      },
     ];
 
     await service.saveSessionMemory('session-1', messages);
 
     expect(mockStorage.saveMemory).toHaveBeenCalledTimes(2);
-    expect(mockEventBus.emit).toHaveBeenCalledWith(expect.objectContaining({ type: 'memory.session.saved' }));
+    expect(mockEventBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'memory.session.saved' }),
+    );
   });
 
   it('should archive session with summary', async () => {
@@ -61,8 +81,26 @@ describe('MemoryService', () => {
       modelConfig: DEFAULT_MODEL_CONFIG,
       knowledgeConfig: DEFAULT_KNOWLEDGE_CONFIG,
       messages: [
-        { id: 'msg-1', role: MessageRole.USER, content: 'What is SOLID?', model: 'user', tier: TierLevel.DYNAMIC, tokenCount: 3, metadata: {}, createdAt: new Date() },
-        { id: 'msg-2', role: MessageRole.ASSISTANT, content: 'SOLID is 5 principles...', model: 'mimo', tier: TierLevel.DYNAMIC, tokenCount: 5, metadata: {}, createdAt: new Date() },
+        {
+          id: 'msg-1',
+          role: MessageRole.USER,
+          content: 'What is SOLID?',
+          model: 'user',
+          tier: TierLevel.DYNAMIC,
+          tokenCount: 3,
+          metadata: {},
+          createdAt: new Date(),
+        },
+        {
+          id: 'msg-2',
+          role: MessageRole.ASSISTANT,
+          content: 'SOLID is 5 principles...',
+          model: 'mimo',
+          tier: TierLevel.DYNAMIC,
+          tokenCount: 5,
+          metadata: {},
+          createdAt: new Date(),
+        },
       ],
       memory: [],
       metadata: {},
@@ -75,7 +113,9 @@ describe('MemoryService', () => {
     expect(summary).toContain('Session had 2 messages');
     expect(summary).toContain('What is SOLID');
     expect(mockVector.upsert).toHaveBeenCalledWith('long-term-memory', expect.any(Array));
-    expect(mockEventBus.emit).toHaveBeenCalledWith(expect.objectContaining({ type: 'memory.session.archived' }));
+    expect(mockEventBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'memory.session.archived' }),
+    );
   });
 
   it('should auto-cleanup messages when over limit', async () => {
@@ -94,7 +134,9 @@ describe('MemoryService', () => {
 
     expect(kept).toHaveLength(10);
     expect(mockStorage.saveMemory).toHaveBeenCalled();
-    expect(mockEventBus.emit).toHaveBeenCalledWith(expect.objectContaining({ type: 'memory.auto.cleanup' }));
+    expect(mockEventBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'memory.auto.cleanup' }),
+    );
   });
 
   it('should not cleanup when under limit', async () => {
@@ -117,7 +159,13 @@ describe('MemoryService', () => {
 
   it('should recall memory from storage', async () => {
     const memories: MemoryEntry[] = [
-      { id: 'mem-1', content: 'SOLID principles', category: 'technical', createdAt: new Date(), updatedAt: new Date() },
+      {
+        id: 'mem-1',
+        content: 'SOLID principles',
+        category: 'technical',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
     (mockStorage.recallMemory as any).mockResolvedValueOnce(memories);
 

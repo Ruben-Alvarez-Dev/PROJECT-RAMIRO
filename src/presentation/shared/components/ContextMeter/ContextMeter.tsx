@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import './ContextMeter.scss';
 
 export interface ContextMeterProps {
@@ -12,8 +12,8 @@ export interface ContextMeterProps {
 }
 
 const THRESHOLDS = {
-  safe: 0.60,
-  warning: 0.80,
+  safe: 0.6,
+  warning: 0.8,
   critical: 0.95,
 };
 
@@ -86,7 +86,8 @@ export const ContextMeter: React.FC<ContextMeterProps> = ({
           )}
         </div>
         <div className="ramiro-context-meter__tooltip">
-          T0: {formatTokens(tier0Tokens)} | T1: {formatTokens(tier1Tokens)} | T2: {formatTokens(tier2Tokens)} | T3: {formatTokens(tier3Tokens)}
+          T0: {formatTokens(tier0Tokens)} | T1: {formatTokens(tier1Tokens)} | T2:{' '}
+          {formatTokens(tier2Tokens)} | T3: {formatTokens(tier3Tokens)}
         </div>
       </div>
       <span className={`ramiro-context-meter__value ramiro-context-meter__value--${status}`}>

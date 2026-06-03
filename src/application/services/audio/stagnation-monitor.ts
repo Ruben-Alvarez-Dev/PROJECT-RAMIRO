@@ -8,9 +8,9 @@
 // 3. User repeats same question → provide cached response
 
 export interface StagnationConfig {
-  readonly maxSameErrorCount: number;      // default 3
-  readonly maxNoProgressTurns: number;     // default 5
-  readonly similarityThreshold: number;    // default 0.85 for "same question"
+  readonly maxSameErrorCount: number; // default 3
+  readonly maxNoProgressTurns: number; // default 5
+  readonly similarityThreshold: number; // default 0.85 for "same question"
 }
 
 export const DEFAULT_STAGNATION_CONFIG: StagnationConfig = {
@@ -111,7 +111,11 @@ export class StagnationMonitor {
   }
 
   private normalize(text: string): string {
-    return text.toLowerCase().trim().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ');
   }
 
   private countConsecutiveSame(history: string[]): number {
@@ -125,7 +129,7 @@ export class StagnationMonitor {
     return count;
   }
 
-  private detectNewInformation(userText: string, assistantText: string): boolean {
+  private detectNewInformation(userText: string, _assistantText: string): boolean {
     // Simple heuristic: if the user introduces new keywords not seen in last 3 turns
     const recentKeywords = new Set<string>();
     const recent = this.turnHistory.slice(-3);
@@ -136,7 +140,10 @@ export class StagnationMonitor {
       }
     }
 
-    const newWords = userText.toLowerCase().split(/\s+/).filter(w => w.length > 4 && !recentKeywords.has(w));
+    const newWords = userText
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 4 && !recentKeywords.has(w));
     return newWords.length > 2;
   }
 

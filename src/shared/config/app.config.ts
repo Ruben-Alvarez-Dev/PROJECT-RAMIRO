@@ -1,9 +1,9 @@
 // src/shared/config/app.config.ts
 
-import type { ModelConfig, KnowledgeConfig, AudioConfig, VideoConfig } from '@core/domain/types';
-import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
-import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import type { AudioConfig, KnowledgeConfig, ModelConfig, VideoConfig } from '@core/domain/types';
 import { DEFAULT_AUDIO_CONFIG } from '@core/domain/value-objects/audio-config';
+import { DEFAULT_KNOWLEDGE_CONFIG } from '@core/domain/value-objects/knowledge-config';
+import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
 import { DEFAULT_VIDEO_CONFIG } from '@core/domain/value-objects/video-config';
 
 export interface AppConfig {

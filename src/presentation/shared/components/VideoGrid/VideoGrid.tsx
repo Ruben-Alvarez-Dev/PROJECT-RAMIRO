@@ -1,4 +1,5 @@
-import React, { useCallback, useRef, useEffect } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import './VideoGrid.scss';
 
 export interface VideoGridSource {
@@ -49,7 +50,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
     }
     // Clean up removed sources
     for (const [id, el] of videoRefs.current) {
-      if (!sources.find(s => s.id === id)) {
+      if (!sources.find((s) => s.id === id)) {
         el.srcObject = null;
         videoRefs.current.delete(id);
       }
@@ -67,22 +68,14 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
   if (sources.length === 0) return null;
 
   return (
-    <div
-      className={`ramiro-video-grid ${className}`}
-      data-sources={Math.min(sources.length, 4)}
-    >
+    <div className={`ramiro-video-grid ${className}`} data-sources={Math.min(sources.length, 4)}>
       {sources.slice(0, maxSources).map((source) => (
         <div
           key={source.id}
           className={`ramiro-video-grid__cell ${focusedSourceId === source.id ? 'ramiro-video-grid__cell--focused' : ''}`}
           onClick={() => onSourceClick?.(source.id)}
         >
-          <video
-            ref={(el) => setVideoRef(source.id, el)}
-            autoPlay
-            muted
-            playsInline
-          />
+          <video ref={(el) => setVideoRef(source.id, el)} autoPlay muted playsInline />
           <span className="ramiro-video-grid__fps">{fps}fps</span>
           <span className="ramiro-video-grid__label">
             <span className="ramiro-video-grid__source-type">

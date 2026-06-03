@@ -1,11 +1,9 @@
 // src/application/services/orchestrator.service.ts
 
-import type { ILLMPort } from '@core/ports/output/llm.port';
-import type { ISTTPort } from '@core/ports/output/stt.port';
-import type { ITTSPort } from '@core/ports/output/tts.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { ModelConfig, LLMMessage, LLMRequest, MultimodalRequest } from '@core/domain/types';
 import type { ModelRole } from '@core/domain/enums';
+import type { LLMMessage, LLMRequest, ModelConfig } from '@core/domain/types';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
+import type { ILLMPort } from '@core/ports/output/llm.port';
 
 export interface OrchestrationRequest {
   readonly messages: LLMMessage[];
@@ -44,13 +42,18 @@ export class OrchestratorService {
       // Fallback
       const fallbackAdapter = this.modelAdapters.get(request.modelConfig.fallback.provider);
       if (!fallbackAdapter) {
-        throw new Error(`No adapter found for provider: ${provider.provider} and no fallback available`);
+        throw new Error(
+          `No adapter found for provider: ${provider.provider} and no fallback available`,
+        );
       }
       return this.executeWithAdapter(fallbackAdapter, request, request.modelConfig.fallback);
     }
 
     try {
-      return this.executeWithAdapter(adapter, request, provider);
+      // NOTE: `await` is required here — executeWithAdapter is async and the
+      // adapter can reject *inside* its `for await` loop. Without awaiting, the
+      // rejected promise would escape this try/catch and failover would never run.
+      return await this.executeWithAdapter(adapter, request, provider);
     } catch {
       // Primary failed, try fallback
       this.eventBus.emit({
@@ -67,12 +70,18 @@ export class OrchestratorService {
 
   private resolveProvider(role: ModelRole, config: ModelConfig) {
     switch (role) {
-      case 'omni': return config.omni;
-      case 'pro': return config.pro;
-      case 'tts': return config.tts;
-      case 'stt': return config.stt;
-      case 'fallback': return config.fallback;
-      default: return config.omni;
+      case 'omni':
+        return config.omni;
+      case 'pro':
+        return config.pro;
+      case 'tts':
+        return config.tts;
+      case 'stt':
+        return config.stt;
+      case 'fallback':
+        return config.fallback;
+      default:
+        return config.omni;
     }
   }
 

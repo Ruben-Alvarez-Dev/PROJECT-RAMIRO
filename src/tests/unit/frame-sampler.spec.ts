@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { FrameSampler, DEFAULT_SAMPLER_CONFIG } from '@application/services/video/frame-sampler';
+import { DEFAULT_SAMPLER_CONFIG, FrameSampler } from '@application/services/video/frame-sampler';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('FrameSampler', () => {
   let sampler: FrameSampler;
@@ -19,16 +19,45 @@ describe('FrameSampler', () => {
   });
 
   it('should reject more than 4 sources', async () => {
-    const mockStream = { getTracks: () => [] } as any;
+    const mockStream = { getTracks: () => [] } as unknown as MediaStream;
 
-    // We can't truly test addSource without DOM, but we verify the 4-source limit
-    // by testing the error path
-    // Mock document.createElement for test environment
-    const origCreate = document.createElement.bind(document);
+    // FrameSampler.addSource touches the DOM (createElement('video'/'canvas')).
+    // Stub it with inert fakes so we can exercise the real 4-source cap logic
+    // without depending on a full media stack. (DOM extraction → Wave 2.)
+    const fakeVideo = () => ({
+      srcObject: null as unknown,
+      muted: false,
+      playsInline: false,
+      play: async () => {},
+      remove: () => {},
+    });
+    const fakeCanvas = () => ({
+      width: 0,
+      height: 0,
+      getContext: () => ({ drawImage: () => {} }),
+      toDataURL: () => 'data:image/jpeg;base64,AAAA',
+    });
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tag: string) => (tag === 'canvas' ? fakeCanvas() : fakeVideo()) as unknown as HTMLElement,
+    );
 
-    // This test verifies the source count tracking
-    expect(sampler.getActiveSourceCount()).toBe(0);
-    expect(DEFAULT_SAMPLER_CONFIG.fpsPerSource).toBe(5);
+    try {
+      // Fill the 4 allowed slots, then expect the 5th to be rejected.
+      for (let i = 0; i < 4; i++) {
+        await sampler.addSource(`src-${i}`, `Source ${i}`, 'camera', mockStream);
+      }
+      expect(sampler.getActiveSourceCount()).toBe(4);
+
+      await expect(
+        sampler.addSource('src-overflow', 'Overflow', 'camera', mockStream),
+      ).rejects.toThrow('Maximum 4 simultaneous video sources allowed');
+
+      sampler.stopAll();
+      expect(sampler.getActiveSourceCount()).toBe(0);
+      expect(DEFAULT_SAMPLER_CONFIG.fpsPerSource).toBe(5);
+    } finally {
+      vi.restoreAllMocks();
+    }
   });
 
   it('should provide latest frames from buffer', () => {

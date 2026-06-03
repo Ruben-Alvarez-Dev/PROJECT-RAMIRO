@@ -1,16 +1,16 @@
 // src/application/services/audio/audio-pipeline.service.ts
 // Full audio pipeline: Mic → VAD → STT → LLM → TTS → Speaker
 
-import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
-import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
-import type { ISTTPort } from '@core/ports/output/stt.port';
-import type { ITTSPort } from '@core/ports/output/tts.port';
-import type { ILLMPort } from '@core/ports/output/llm.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
 import type { AudioConfig, AudioFrame, LLMMessage, StreamHandle } from '@core/domain/types';
 import { DEFAULT_AUDIO_CONFIG } from '@core/domain/value-objects/audio-config';
-import { VADProcessor, VADState, type VADEvent } from './vad-processor';
+import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
+import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
+import type { ILLMPort } from '@core/ports/output/llm.port';
+import type { ISTTPort } from '@core/ports/output/stt.port';
+import type { ITTSPort } from '@core/ports/output/tts.port';
 import { Logger } from '@shared/logging/logger';
+import { type VADEvent, VADProcessor, VADState } from './vad-processor';
 
 export interface AudioPipelineConfig {
   audioConfig?: AudioConfig;
@@ -131,7 +131,7 @@ export class AudioPipelineService {
     }
   }
 
-  private async handleVADEvent(event: VADEvent): void {
+  private async handleVADEvent(event: VADEvent): Promise<void> {
     switch (event.state) {
       case VADState.SPEECH:
         this.updateState({ status: 'listening' });
@@ -230,7 +230,9 @@ export class AudioPipelineService {
   private updateState(partial: Partial<AudioPipelineState>): void {
     this.currentState = { ...this.currentState, ...partial };
     for (const cb of this.stateCallbacks) {
-      try { cb(this.currentState); } catch {}
+      try {
+        cb(this.currentState);
+      } catch {}
     }
   }
 

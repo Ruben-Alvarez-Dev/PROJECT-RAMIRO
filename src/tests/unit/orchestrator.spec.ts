@@ -1,20 +1,22 @@
-# src/tests/unit/orchestrator.spec.ts
+// src/tests/unit/orchestrator.spec.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OrchestratorService } from '@application/services/orchestrator.service';
-import type { ILLMPort, LLMChunk } from '@core/ports/output/llm.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { LLMRequest, ModelConfig } from '@core/domain/types';
 import { ModelRole } from '@core/domain/enums';
+import type { LLMChunk } from '@core/domain/types';
 import { DEFAULT_MODEL_CONFIG } from '@core/domain/value-objects/model-config';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
+import type { ILLMPort } from '@core/ports/output/llm.port';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('OrchestratorService', () => {
   const createMockAdapter = (response: string): ILLMPort => ({
-    chat: async function* (req: LLMRequest): AsyncIterable<LLMChunk> {
+    chat: async function* (): AsyncIterable<LLMChunk> {
       yield { content: response };
       yield { content: '', finishReason: 'stop', usage: { promptTokens: 10, completionTokens: 5 } };
     },
-    chatMultimodal: async function* () { yield { content: response }; },
+    chatMultimodal: async function* () {
+      yield { content: response };
+    },
     getAvailableModels: async () => [],
     estimateTokens: (text: string) => Math.ceil(text.length / 4),
   });
@@ -59,8 +61,12 @@ describe('OrchestratorService', () => {
 
   it('should fall back when primary adapter throws', async () => {
     const failingAdapter: ILLMPort = {
-      chat: async function* () { throw new Error('API down'); },
-      chatMultimodal: async function* () { throw new Error('API down'); },
+      chat: async function* () {
+        throw new Error('API down');
+      },
+      chatMultimodal: async function* () {
+        throw new Error('API down');
+      },
       getAvailableModels: async () => [],
       estimateTokens: () => 0,
     };
@@ -76,17 +82,21 @@ describe('OrchestratorService', () => {
 
     expect(result.content).toBe('Qwen fallback response');
     expect(result.provider).toBe('qwen');
-    expect(mockEventBus.emit).toHaveBeenCalledWith(expect.objectContaining({ type: 'orchestrator.failover' }));
+    expect(mockEventBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'orchestrator.failover' }),
+    );
   });
 
   it('should throw when no adapter and no fallback available', async () => {
     adapters.clear();
     orchestrator = new OrchestratorService(adapters, mockEventBus);
 
-    await expect(orchestrator.execute({
-      messages: [{ role: 'user', content: 'test' }],
-      modelConfig: DEFAULT_MODEL_CONFIG,
-      role: ModelRole.OMNI,
-    })).rejects.toThrow('No adapter found');
+    await expect(
+      orchestrator.execute({
+        messages: [{ role: 'user', content: 'test' }],
+        modelConfig: DEFAULT_MODEL_CONFIG,
+        role: ModelRole.OMNI,
+      }),
+    ).rejects.toThrow('No adapter found');
   });
 });

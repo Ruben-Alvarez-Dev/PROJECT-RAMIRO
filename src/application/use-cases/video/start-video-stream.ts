@@ -1,15 +1,14 @@
 // src/application/use-cases/video/start-video-stream.ts
 
+import type { ImageBuffer, LLMMessage, VideoFrame, VideoSource } from '@core/domain/types';
 import type { IVideoInputPort } from '@core/ports/input/video-input.port';
-import type { ILLMPort } from '@core/ports/output/llm.port';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { VideoSource, VideoFrame, LLMMessage, ImageBuffer } from '@core/domain/types';
-import { ModelRole } from '@core/domain/enums';
+import type { ILLMPort } from '@core/ports/output/llm.port';
 
 export interface StartVideoStreamInput {
   readonly sessionId: string;
-  readonly sources: VideoSource[];  // up to 4
-  readonly fps?: number;            // per source, default 5
+  readonly sources: VideoSource[]; // up to 4
+  readonly fps?: number; // per source, default 5
   readonly systemPrompt?: string;
   readonly tier0Context?: string;
 }
@@ -59,7 +58,11 @@ export class StartVideoStream {
 
         this.eventBus.emit({
           type: 'video.frame.received',
-          payload: { sessionId: input.sessionId, sourceId: frame.sourceId, timestamp: frame.timestamp },
+          payload: {
+            sessionId: input.sessionId,
+            sourceId: frame.sourceId,
+            timestamp: frame.timestamp,
+          },
           timestamp: new Date(),
         });
 
@@ -69,7 +72,10 @@ export class StartVideoStream {
           messages.push({ role: 'system', content: input.systemPrompt });
         }
         if (input.tier0Context) {
-          messages.push({ role: 'system', content: `[TIER 0 — Sacred Word]\n${input.tier0Context}` });
+          messages.push({
+            role: 'system',
+            content: `[TIER 0 — Sacred Word]\n${input.tier0Context}`,
+          });
         }
 
         const latestImages: ImageBuffer[] = [];

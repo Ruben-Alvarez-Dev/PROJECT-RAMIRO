@@ -1,19 +1,24 @@
-# src/tests/unit/audio-pipeline.spec.ts
+// src/tests/unit/audio-pipeline.spec.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AudioPipelineService } from '@application/services/audio/audio-pipeline.service';
+import { StreamStatus, StreamType } from '@core/domain/enums';
+import type {
+  AudioBuffer,
+  AudioFrame,
+  LLMChunk,
+  StreamHandle,
+  Transcript,
+} from '@core/domain/types';
 import type { IAudioInputPort } from '@core/ports/input/audio-input.port';
+import type { IEventBus } from '@core/ports/notification/event-bus.port';
 import type { IAudioOutputPort } from '@core/ports/output/audio-output.port';
+import type { ILLMPort } from '@core/ports/output/llm.port';
 import type { ISTTPort } from '@core/ports/output/stt.port';
 import type { ITTSPort } from '@core/ports/output/tts.port';
-import type { ILLMPort } from '@core/ports/output/llm.port';
-import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { AudioFrame, StreamHandle, AudioBuffer, Transcript, LLMChunk } from '@core/domain/types';
-import { StreamType, StreamStatus } from '@core/domain/enums';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('AudioPipelineService', () => {
   let pipeline: AudioPipelineService;
-  let frameCallback: ((frame: AudioFrame) => void) | null = null;
 
   const mockAudioInput: IAudioInputPort = {
     startCapture: vi.fn().mockResolvedValue({
@@ -23,9 +28,7 @@ describe('AudioPipelineService', () => {
       startedAt: new Date(),
     } satisfies StreamHandle),
     stopCapture: vi.fn().mockResolvedValue(undefined),
-    onFrame: vi.fn().mockImplementation((cb: (frame: AudioFrame) => void) => {
-      frameCallback = cb;
-    }),
+    onFrame: vi.fn().mockImplementation((_cb: (frame: AudioFrame) => void) => {}),
     getAvailableDevices: vi.fn().mockResolvedValue([]),
     selectDevice: vi.fn().mockResolvedValue(undefined),
   };
@@ -65,7 +68,11 @@ describe('AudioPipelineService', () => {
     chat: async function* () {
       yield { content: 'SOLID ' } as LLMChunk;
       yield { content: 'son 5 principios.' } as LLMChunk;
-      yield { content: '', finishReason: 'stop', usage: { promptTokens: 100, completionTokens: 50 } } as LLMChunk;
+      yield {
+        content: '',
+        finishReason: 'stop',
+        usage: { promptTokens: 100, completionTokens: 50 },
+      } as LLMChunk;
     },
     chatMultimodal: async function* () {},
     getAvailableModels: async () => [],
@@ -79,7 +86,6 @@ describe('AudioPipelineService', () => {
   };
 
   beforeEach(() => {
-    frameCallback = null;
     pipeline = new AudioPipelineService(
       mockAudioInput,
       mockAudioOutput,
@@ -146,7 +152,7 @@ describe('AudioPipelineService', () => {
     await pipeline.stopTalking(segment);
 
     // Allow async processing
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100));
 
     expect(mockSTT.transcribe).toHaveBeenCalled();
     expect(pipeline.getState().currentTranscript).toBe('¿Qué es SOLID?');
@@ -168,7 +174,7 @@ describe('AudioPipelineService', () => {
     const segment = new Float32Array(480).fill(0.001); // Very quiet
     await pipeline.stopTalking(segment);
 
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50));
 
     expect(pipeline.getState().lastResponse).toBe('');
   });
@@ -182,7 +188,7 @@ describe('AudioPipelineService', () => {
     const segment = new Float32Array(24000).fill(0.1);
     await pipeline.stopTalking(segment);
 
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100));
 
     expect(pipeline.getState().status).toBe('error');
     expect(pipeline.getState().error).toContain('STT service unavailable');
@@ -194,19 +200,19 @@ describe('AudioPipelineService', () => {
     // First utterance
     pipeline.startTalking();
     await pipeline.stopTalking(new Float32Array(24000).fill(0.1));
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100));
 
     const history1 = pipeline.getConversationHistory();
-    const userMsgs1 = history1.filter(m => m.role === 'user');
+    const userMsgs1 = history1.filter((m) => m.role === 'user');
     expect(userMsgs1).toHaveLength(1);
 
     // Second utterance — STT returns same result but pipeline accumulates
     pipeline.startTalking();
     await pipeline.stopTalking(new Float32Array(24000).fill(0.1));
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100));
 
     const history2 = pipeline.getConversationHistory();
-    const userMsgs2 = history2.filter(m => m.role === 'user');
+    const userMsgs2 = history2.filter((m) => m.role === 'user');
     expect(userMsgs2).toHaveLength(2);
   });
 });

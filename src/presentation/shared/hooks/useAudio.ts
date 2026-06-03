@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
 import type { AudioConfig } from '@core/domain/value-objects/audio-config';
 import { DEFAULT_AUDIO_CONFIG } from '@core/domain/value-objects/audio-config';
+import { useCallback, useRef, useState } from 'react';
 
 export interface AudioSource {
   id: string;
@@ -46,7 +46,7 @@ export function useAudio(): UseAudioReturn {
 
   const stopCapture = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
     setIsCapturing(false);
@@ -55,7 +55,7 @@ export function useAudio(): UseAudioReturn {
 
   const getDevices = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.filter(d => d.kind === 'audioinput');
+    return devices.filter((d) => d.kind === 'audioinput');
   }, []);
 
   return { isCapturing, sources, error, startCapture, stopCapture, getDevices };

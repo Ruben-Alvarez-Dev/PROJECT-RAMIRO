@@ -1,6 +1,6 @@
+import { StreamStatus, StreamType } from '@core/domain/enums';
 import type { StreamHandle, VideoFrame, VideoSource } from '@core/domain/types';
 import type { IVideoInputPort } from '@core/ports/input/video-input.port';
-import { StreamStatus, StreamType } from '@core/domain/enums';
 import { Logger } from '@shared/logging/logger';
 
 /**
@@ -15,7 +15,7 @@ export class OBSVideoAdapter implements IVideoInputPort {
 
   constructor(private readonly obsUrl: string = 'ws://localhost:4455') {}
 
-  async connect(password?: string): Promise<void> {
+  async connect(_password?: string): Promise<void> {
     this.ws = new WebSocket(this.obsUrl);
     return new Promise((resolve, reject) => {
       if (!this.ws) return reject(new Error('WebSocket not created'));
@@ -32,14 +32,21 @@ export class OBSVideoAdapter implements IVideoInputPort {
     if (!this.connected) await this.connect();
     const handleId = crypto.randomUUID();
     this.logger.info('OBS capture started', { handleId, source: source.name });
-    return { id: handleId, type: StreamType.VIDEO_SCREEN, status: StreamStatus.ACTIVE, startedAt: new Date() };
+    return {
+      id: handleId,
+      type: StreamType.VIDEO_SCREEN,
+      status: StreamStatus.ACTIVE,
+      startedAt: new Date(),
+    };
   }
 
   async stopCapture(handle: StreamHandle): Promise<void> {
     this.logger.info('OBS capture stopped', { handleId: handle.id });
   }
 
-  onFrame(callback: (frame: VideoFrame) => void): void { this.frameCallbacks.add(callback); }
+  onFrame(callback: (frame: VideoFrame) => void): void {
+    this.frameCallbacks.add(callback);
+  }
 
   async getAvailableSources(): Promise<VideoSource[]> {
     return [{ id: 'obs-scene', type: StreamType.VIDEO_SCREEN, name: 'OBS Scene' }];

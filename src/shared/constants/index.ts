@@ -22,18 +22,18 @@ export const DEFAULT_MAX_TOKENS = 32768;
 export const DEFAULT_CONTEXT_WINDOW = 1_000_000;
 
 // Knowledge defaults
-export const TIER0_MAX_TOKEN_RATIO = 0.30;
+export const TIER0_MAX_TOKEN_RATIO = 0.3;
 export const TIER1_MAX_TOKEN_RATIO = 0.25;
 export const TIER2_MAX_TOKEN_RATIO = 0.35;
-export const TIER3_MAX_TOKEN_RATIO = 0.10;
+export const TIER3_MAX_TOKEN_RATIO = 0.1;
 export const DEFAULT_SEARCH_LIMIT = 10;
 export const DEFAULT_CHUNK_SIZE = 512;
 export const DEFAULT_CHUNK_OVERLAP = 64;
 
 // Memory defaults
 export const MAX_HISTORY_MESSAGES = 10;
-export const AUTO_CLEANUP_THRESHOLD = 0.80;
-export const AGGRESSIVE_CLEANUP_THRESHOLD = 0.90;
+export const AUTO_CLEANUP_THRESHOLD = 0.8;
+export const AGGRESSIVE_CLEANUP_THRESHOLD = 0.9;
 export const SESSION_ARCHIVE_DURATION_MS = 3_600_000; // 1 hour
 
 // Performance targets

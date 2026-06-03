@@ -1,5 +1,5 @@
-import type { IStoragePort } from '@core/ports/output/storage.port';
 import type { MemoryEntry, Session, SessionFilter, SessionSummary } from '@core/domain/types';
+import type { IStoragePort } from '@core/ports/output/storage.port';
 import { Logger } from '@shared/logging/logger';
 
 /**
@@ -25,10 +25,10 @@ export class SQLiteStorageAdapter implements IStoragePort {
 
   async listSessions(filter?: SessionFilter): Promise<SessionSummary[]> {
     let sessions = Array.from(this.sessions.values());
-    if (filter?.state) sessions = sessions.filter(s => s.state === filter.state);
-    if (filter?.type) sessions = sessions.filter(s => s.type === filter.type);
+    if (filter?.state) sessions = sessions.filter((s) => s.state === filter.state);
+    if (filter?.type) sessions = sessions.filter((s) => s.type === filter.type);
     if (filter?.limit) sessions = sessions.slice(0, filter.limit);
-    return sessions.map(s => ({
+    return sessions.map((s) => ({
       id: s.id,
       state: s.state,
       type: s.type,
@@ -47,9 +47,9 @@ export class SQLiteStorageAdapter implements IStoragePort {
     this.memories.set(memory.id, { ...memory, updatedAt: new Date() });
   }
 
-  async recallMemory(query: string, limit: number = 10): Promise<MemoryEntry[]> {
+  async recallMemory(query: string, limit = 10): Promise<MemoryEntry[]> {
     const results = Array.from(this.memories.values())
-      .filter(m => m.content.toLowerCase().includes(query.toLowerCase()))
+      .filter((m) => m.content.toLowerCase().includes(query.toLowerCase()))
       .slice(0, limit);
     return results;
   }

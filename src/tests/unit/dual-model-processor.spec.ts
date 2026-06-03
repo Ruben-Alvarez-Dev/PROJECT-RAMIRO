@@ -1,22 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DualModelProcessor } from '@application/services/video/dual-model-processor';
-import type { ILLMPort, LLMChunk } from '@core/ports/output/llm.port';
+import type { LLMChunk, LLMRequest } from '@core/domain/types';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { LLMRequest, SampledFrame } from '@core/domain/types';
+import type { ILLMPort } from '@core/ports/output/llm.port';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createMockAdapter = (response: string): ILLMPort => ({
-  chat: async function* (req: LLMRequest): AsyncIterable<LLMChunk> {
+  chat: async function* (): AsyncIterable<LLMChunk> {
     yield { content: response };
     yield { content: '', finishReason: 'stop', usage: { promptTokens: 10, completionTokens: 5 } };
   },
-  chatMultimodal: async function* () { yield { content: response }; },
+  chatMultimodal: async function* () {
+    yield { content: response };
+  },
   getAvailableModels: async () => [],
   estimateTokens: (text: string) => Math.ceil(text.length / 4),
 });
 
 const createFailingAdapter = (): ILLMPort => ({
-  chat: async function* () { throw new Error('API down'); },
-  chatMultimodal: async function* () { throw new Error('API down'); },
+  chat: async function* () {
+    throw new Error('API down');
+  },
+  chatMultimodal: async function* () {
+    throw new Error('API down');
+  },
   getAvailableModels: async () => [],
   estimateTokens: () => 0,
 });
@@ -116,12 +122,16 @@ describe('DualModelProcessor', () => {
       mockEventBus,
     );
 
-    await expect(processor.process([createMockFrame('cam')])).rejects.toThrow('Both OMNI and PRO models failed');
+    await expect(processor.process([createMockFrame('cam')])).rejects.toThrow(
+      'Both OMNI and PRO models failed',
+    );
   });
 
   it('should queue requests when already processing', async () => {
     let resolveFirst: () => void;
-    const firstPromise = new Promise<void>(r => { resolveFirst = r; });
+    const firstPromise = new Promise<void>((r) => {
+      resolveFirst = r;
+    });
 
     const slowAdapter: ILLMPort = {
       chat: async function* () {
@@ -133,11 +143,7 @@ describe('DualModelProcessor', () => {
       estimateTokens: () => 10,
     };
 
-    processor = new DualModelProcessor(
-      slowAdapter,
-      createMockAdapter('fast'),
-      mockEventBus,
-    );
+    processor = new DualModelProcessor(slowAdapter, createMockAdapter('fast'), mockEventBus);
 
     // Start first processing (won't complete yet)
     const p1 = processor.process([createMockFrame('cam1')]);
@@ -168,12 +174,10 @@ describe('DualModelProcessor', () => {
       estimateTokens: () => 10,
     };
 
-    processor = new DualModelProcessor(
-      captureAdapter,
-      captureAdapter,
-      mockEventBus,
-      { systemPrompt: 'You are Ramiro.', tier0Context: 'SOLID principles...' },
-    );
+    processor = new DualModelProcessor(captureAdapter, captureAdapter, mockEventBus, {
+      systemPrompt: 'You are Ramiro.',
+      tier0Context: 'SOLID principles...',
+    });
 
     await processor.process([createMockFrame('cam')]);
 

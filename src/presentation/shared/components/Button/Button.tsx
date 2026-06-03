@@ -1,5 +1,5 @@
 // src/presentation/shared/components/Button/Button.tsx
-import React from 'react';
+import type React from 'react';
 import './Button.scss';
 
 export interface ButtonProps {
@@ -34,12 +34,7 @@ export const Button: React.FC<ButtonProps> = ({
     .join(' ');
 
   return (
-    <button
-      className={classNames}
-      disabled={disabled || loading}
-      onClick={onClick}
-      title={title}
-    >
+    <button className={classNames} disabled={disabled || loading} onClick={onClick} title={title}>
       {loading && <span className="ramiro-button__spinner" />}
       {children}
     </button>

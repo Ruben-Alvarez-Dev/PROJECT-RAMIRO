@@ -1,8 +1,8 @@
 // src/application/services/context-manager.service.ts
 
-import type { KnowledgeConfig, LLMMessage, SearchResult, Message } from '@core/domain/types';
-import type { IKnowledgePort } from '@core/ports/input/knowledge.port';
 import type { TierLevel } from '@core/domain/enums';
+import type { KnowledgeConfig, Message, SearchResult } from '@core/domain/types';
+import type { IKnowledgePort } from '@core/ports/input/knowledge.port';
 
 interface ContextBudget {
   tier0: number;
@@ -56,10 +56,10 @@ export class ContextManager {
 
   private calculateBudget(windowSize: number): ContextBudget {
     return {
-      tier0: Math.floor(windowSize * 0.30),  // 30% for sacred docs
-      tier1: Math.floor(windowSize * 0.25),  // 25% for retrieved knowledge
-      tier2: Math.floor(windowSize * 0.35),  // 35% for conversation
-      tier3: Math.floor(windowSize * 0.10),  // 10% for current turn
+      tier0: Math.floor(windowSize * 0.3), // 30% for sacred docs
+      tier1: Math.floor(windowSize * 0.25), // 25% for retrieved knowledge
+      tier2: Math.floor(windowSize * 0.35), // 35% for conversation
+      tier3: Math.floor(windowSize * 0.1), // 10% for current turn
     };
   }
 
@@ -82,16 +82,15 @@ export class ContextManager {
     // Older messages: progressive summarization
     if (older.length > 0) {
       const mid = Math.floor(older.length / 2);
-      const keyPoints = older.slice(mid).map((m: Message) =>
-        `${m.role}: ${m.content.substring(0, 100)}...`
-      ).join('\n');
+      const keyPoints = older
+        .slice(mid)
+        .map((m: Message) => `${m.role}: ${m.content.substring(0, 100)}...`)
+        .join('\n');
       result += `[Earlier context]\n${keyPoints}\n\n`;
     }
 
     // Recent messages: full detail
-    result += recent.map((m: Message) =>
-      `${m.role}: ${m.content}`
-    ).join('\n');
+    result += recent.map((m: Message) => `${m.role}: ${m.content}`).join('\n');
 
     return this.truncateToTokens(result, budget);
   }

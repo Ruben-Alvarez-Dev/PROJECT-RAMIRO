@@ -1,6 +1,17 @@
 // src/core/domain/types.ts
 
-import type { SessionState, SessionType, MessageRole, StreamType, StreamStatus, TierLevel, ModelRole, Platform } from './enums';
+import type {
+  MessageRole,
+  SessionState,
+  SessionType,
+  StreamStatus,
+  StreamType,
+  TierLevel,
+} from './enums';
+import type { AudioConfig } from './value-objects/audio-config';
+import type { KnowledgeConfig } from './value-objects/knowledge-config';
+import type { ModelConfig, ModelProvider } from './value-objects/model-config';
+import type { VideoConfig } from './value-objects/video-config';
 
 // ─── Identifiers ───
 export type ID = string;
@@ -80,10 +91,11 @@ export interface LLMChunk {
 export interface MultimodalRequest {
   readonly messages: LLMMessage[];
   readonly audio?: AudioBuffer;
-  readonly images?: ImageData[];
+  readonly images?: ImageBuffer[];
   readonly model?: string;
   readonly temperature?: number;
   readonly maxTokens?: number;
+  readonly stream?: boolean;
 }
 
 // ─── Speech ───
@@ -263,7 +275,4 @@ export interface ModelInfo {
 }
 
 // Re-export value objects from their modules
-export type { AudioConfig } from './value-objects/audio-config';
-export type { VideoConfig } from './value-objects/video-config';
-export type { ModelConfig, ModelProvider } from './value-objects/model-config';
-export type { KnowledgeConfig } from './value-objects/knowledge-config';
+export type { AudioConfig, VideoConfig, ModelConfig, ModelProvider, KnowledgeConfig };

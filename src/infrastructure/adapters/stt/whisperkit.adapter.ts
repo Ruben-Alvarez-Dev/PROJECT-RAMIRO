@@ -1,10 +1,10 @@
 // src/infrastructure/adapters/stt/whisperkit.adapter.ts
 // Native macOS STT using WhisperKit on Apple Silicon
 
-import type { ISTTPort } from '@core/ports/output/stt.port';
 import type { AudioBuffer, AudioFrame, Transcript, TranscriptChunk } from '@core/domain/types';
-import { Logger } from '@shared/logging/logger';
+import type { ISTTPort } from '@core/ports/output/stt.port';
 import { AdapterError } from '@shared/errors/domain.error';
+import { Logger } from '@shared/logging/logger';
 
 /**
  * WhisperKit adapter — on-device STT for Apple Silicon.
@@ -14,23 +14,23 @@ import { AdapterError } from '@shared/errors/domain.error';
 export class WhisperKitAdapter implements ISTTPort {
   private readonly logger = new Logger('WhisperKit');
   private readonly modelPath: string;
-  private language: string = 'es';
+  private language = 'es';
 
   constructor(
     private readonly invoke: (cmd: string, args?: Record<string, unknown>) => Promise<unknown>,
-    modelPath: string = 'whisperkit-base',
+    modelPath = 'whisperkit-base',
   ) {
     this.modelPath = modelPath;
   }
 
   async transcribe(audio: AudioBuffer): Promise<Transcript> {
     try {
-      const result = await this.invoke('whisperkit_transcribe', {
+      const result = (await this.invoke('whisperkit_transcribe', {
         audioData: Array.from(audio.data),
         sampleRate: audio.sampleRate,
         language: this.language,
         model: this.modelPath,
-      }) as { text: string; confidence: number; duration: number };
+      })) as { text: string; confidence: number; duration: number };
 
       return {
         text: result.text,
@@ -63,12 +63,12 @@ export class WhisperKitAdapter implements ISTTPort {
           const merged = this.mergeBuffers(buffer);
           buffer = [];
 
-          const result = await this.invoke('whisperkit_transcribe_stream', {
+          const result = (await this.invoke('whisperkit_transcribe_stream', {
             audioData: Array.from(merged),
             sampleRate: value.sampleRate,
             language: this.language,
             model: this.modelPath,
-          }) as { text: string; isFinal: boolean; confidence: number };
+          })) as { text: string; isFinal: boolean; confidence: number };
 
           yield {
             text: result.text,
@@ -81,13 +81,13 @@ export class WhisperKitAdapter implements ISTTPort {
       // Flush remaining buffer
       if (buffer.length > 0) {
         const merged = this.mergeBuffers(buffer);
-        const result = await this.invoke('whisperkit_transcribe_stream', {
+        const result = (await this.invoke('whisperkit_transcribe_stream', {
           audioData: Array.from(merged),
           sampleRate: 24000,
           language: this.language,
           model: this.modelPath,
           flush: true,
-        }) as { text: string; isFinal: boolean; confidence: number };
+        })) as { text: string; isFinal: boolean; confidence: number };
 
         yield { text: result.text, isFinal: true, confidence: result.confidence };
       }

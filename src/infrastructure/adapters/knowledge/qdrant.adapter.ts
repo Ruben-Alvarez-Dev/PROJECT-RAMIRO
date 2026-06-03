@@ -20,7 +20,9 @@ export class QdrantAdapter implements IVectorPort {
     const res = await fetch(`${this.baseUrl}/collections/${collection}/points`, {
       method: 'PUT',
       headers: this.headers(),
-      body: JSON.stringify({ points: vectors.map(v => ({ id: v.id, vector: v.values, payload: v.payload })) }),
+      body: JSON.stringify({
+        points: vectors.map((v) => ({ id: v.id, vector: v.values, payload: v.payload })),
+      }),
     });
     if (!res.ok) throw new AdapterError(`Qdrant upsert failed: ${res.status}`, 'qdrant');
     this.logger.debug('Upserted vectors', { collection, count: vectors.length });
@@ -33,8 +35,10 @@ export class QdrantAdapter implements IVectorPort {
       body: JSON.stringify({ vector: query, limit, with_payload: true }),
     });
     if (!res.ok) throw new AdapterError(`Qdrant search failed: ${res.status}`, 'qdrant');
-    const data = await res.json() as { result: Array<{ id: string; score: number; payload: Record<string, unknown> }> };
-    return data.result.map(r => ({ id: r.id, score: r.score, payload: r.payload ?? {} }));
+    const data = (await res.json()) as {
+      result: Array<{ id: string; score: number; payload: Record<string, unknown> }>;
+    };
+    return data.result.map((r) => ({ id: r.id, score: r.score, payload: r.payload ?? {} }));
   }
 
   async delete(collection: string, ids: string[]): Promise<void> {

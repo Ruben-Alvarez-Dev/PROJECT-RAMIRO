@@ -11,10 +11,22 @@ export interface ModelSwitchProps {
 }
 
 const MODE_OPTIONS: Array<{ value: ModelMode; label: string; tooltip: string }> = [
-  { value: 'auto', label: 'AUTO', tooltip: 'System decides: OMNI for speed, PRO for depth, both for video' },
-  { value: 'omni', label: 'OMNI', tooltip: 'Speed mode: realtime visual understanding, low latency' },
+  {
+    value: 'auto',
+    label: 'AUTO',
+    tooltip: 'System decides: OMNI for speed, PRO for depth, both for video',
+  },
+  {
+    value: 'omni',
+    label: 'OMNI',
+    tooltip: 'Speed mode: realtime visual understanding, low latency',
+  },
   { value: 'pro', label: 'PRO', tooltip: 'Depth mode: structured reasoning, exam-quality answers' },
-  { value: 'both', label: 'BOTH', tooltip: 'Parallel: OMNI describes + PRO analyzes simultaneously' },
+  {
+    value: 'both',
+    label: 'BOTH',
+    tooltip: 'Parallel: OMNI describes + PRO analyzes simultaneously',
+  },
 ];
 
 export const ModelSwitch: React.FC<ModelSwitchProps> = ({
@@ -35,7 +47,9 @@ export const ModelSwitch: React.FC<ModelSwitchProps> = ({
             disabled={disabled}
             title={option.tooltip}
           >
-            <span className={`ramiro-model-switch__indicator ramiro-model-switch__indicator--${option.value}`} />
+            <span
+              className={`ramiro-model-switch__indicator ramiro-model-switch__indicator--${option.value}`}
+            />
             {option.label}
           </button>
         </React.Fragment>

@@ -1,10 +1,8 @@
+import type { LLMChunk, LLMRequest, ModelInfo, MultimodalRequest } from '@core/domain/types';
 import type { ILLMPort } from '@core/ports/output/llm.port';
-import type { LLMRequest, LLMChunk, ModelInfo, MultimodalRequest } from '@core/domain/types';
 import { AdapterError } from '@shared/errors/domain.error';
-import { Logger } from '@shared/logging/logger';
 
 export class QwenAdapter implements ILLMPort {
-  private readonly logger = new Logger('QwenAdapter');
 
   constructor(
     private readonly apiKey: string,
@@ -45,7 +43,15 @@ export class QwenAdapter implements ILLMPort {
           const data = JSON.parse(line.slice(6));
           const delta = data.choices?.[0]?.delta;
           if (delta?.content) yield { content: delta.content };
-          if (data.usage) yield { content: '', finishReason: 'stop', usage: { promptTokens: data.usage.prompt_tokens, completionTokens: data.usage.completion_tokens } };
+          if (data.usage)
+            yield {
+              content: '',
+              finishReason: 'stop',
+              usage: {
+                promptTokens: data.usage.prompt_tokens,
+                completionTokens: data.usage.completion_tokens,
+              },
+            };
         } catch {}
       }
     }
@@ -57,10 +63,24 @@ export class QwenAdapter implements ILLMPort {
 
   async getAvailableModels(): Promise<ModelInfo[]> {
     return [
-      { provider: 'qwen', model: 'qwen2.5-omni', displayName: 'Qwen 2.5 Omni', capabilities: ['text', 'vision', 'audio'], contextWindow: 131072 },
-      { provider: 'qwen', model: 'qwen-max', displayName: 'Qwen Max', capabilities: ['text'], contextWindow: 131072 },
+      {
+        provider: 'qwen',
+        model: 'qwen2.5-omni',
+        displayName: 'Qwen 2.5 Omni',
+        capabilities: ['text', 'vision', 'audio'],
+        contextWindow: 131072,
+      },
+      {
+        provider: 'qwen',
+        model: 'qwen-max',
+        displayName: 'Qwen Max',
+        capabilities: ['text'],
+        contextWindow: 131072,
+      },
     ];
   }
 
-  estimateTokens(text: string): number { return Math.ceil(text.length / 3); }
+  estimateTokens(text: string): number {
+    return Math.ceil(text.length / 3);
+  }
 }

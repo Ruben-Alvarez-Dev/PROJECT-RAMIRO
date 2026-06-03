@@ -3,11 +3,11 @@
 // Implements ring buffer per source to prevent memory leaks in long sessions.
 
 export interface FrameSamplerConfig {
-  readonly fpsPerSource: number;      // default 5
-  readonly maxBufferFrames: number;   // default 30 per source (6s at 5fps)
-  readonly jpegQuality: number;       // default 0.7
-  readonly maxWidth: number;          // default 1280
-  readonly maxHeight: number;         // default 720
+  readonly fpsPerSource: number; // default 5
+  readonly maxBufferFrames: number; // default 30 per source (6s at 5fps)
+  readonly jpegQuality: number; // default 0.7
+  readonly maxWidth: number; // default 1280
+  readonly maxHeight: number; // default 720
 }
 
 export const DEFAULT_SAMPLER_CONFIG: FrameSamplerConfig = {
@@ -21,7 +21,7 @@ export const DEFAULT_SAMPLER_CONFIG: FrameSamplerConfig = {
 export interface SampledFrame {
   readonly sourceId: string;
   readonly timestamp: number;
-  readonly jpegData: string;       // base64 encoded JPEG
+  readonly jpegData: string; // base64 encoded JPEG
   readonly width: number;
   readonly height: number;
 }
@@ -52,7 +52,12 @@ export class FrameSampler {
     this.callbacks.add(callback);
   }
 
-  async addSource(sourceId: string, name: string, type: FrameSource['type'], stream: MediaStream): Promise<void> {
+  async addSource(
+    sourceId: string,
+    name: string,
+    type: FrameSource['type'],
+    stream: MediaStream,
+  ): Promise<void> {
     if (this.sources.size >= 4) {
       throw new Error('Maximum 4 simultaneous video sources allowed');
     }
@@ -94,7 +99,7 @@ export class FrameSampler {
     if (!source) return;
 
     if (source.intervalId) clearInterval(source.intervalId);
-    source.stream?.getTracks().forEach(t => t.stop());
+    source.stream?.getTracks().forEach((t) => t.stop());
     source.videoElement?.remove();
     if (source.canvas) this.canvasPool.push(source.canvas);
     this.sources.delete(sourceId);
@@ -105,7 +110,7 @@ export class FrameSampler {
   }
 
   getSources(): Array<{ id: string; name: string; type: FrameSource['type'] }> {
-    return Array.from(this.sources.values()).map(s => ({ id: s.id, name: s.name, type: s.type }));
+    return Array.from(this.sources.values()).map((s) => ({ id: s.id, name: s.name, type: s.type }));
   }
 
   getLatestFrames(): SampledFrame[] {
@@ -166,7 +171,9 @@ export class FrameSampler {
     }
 
     for (const cb of this.callbacks) {
-      try { cb(frame); } catch {}
+      try {
+        cb(frame);
+      } catch {}
     }
   }
 

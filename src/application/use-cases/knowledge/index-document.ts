@@ -1,9 +1,9 @@
 // src/application/use-cases/knowledge/index-document.ts
 
+import type { TierLevel } from '@core/domain/enums';
+import type { Document, IndexResult } from '@core/domain/types';
 import type { IKnowledgePort } from '@core/ports/input/knowledge.port';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { Document, IndexResult } from '@core/domain/types';
-import { TierLevel } from '@core/domain/enums';
 
 export interface IndexDocumentInput {
   readonly title: string;

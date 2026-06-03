@@ -1,8 +1,8 @@
 // src/infrastructure/adapters/video/livekit-video.adapter.ts
 
-import type { IVideoInputPort } from '@core/ports/input/video-input.port';
-import type { StreamHandle, VideoFrame, VideoSource } from '@core/domain/types';
 import { StreamStatus, StreamType } from '@core/domain/enums';
+import type { StreamHandle, VideoFrame, VideoSource } from '@core/domain/types';
+import type { IVideoInputPort } from '@core/ports/input/video-input.port';
 import { StreamError } from '@shared/errors/domain.error';
 import { Logger } from '@shared/logging/logger';
 
@@ -28,7 +28,10 @@ export class LiveKitVideoAdapter implements IVideoInputPort {
             frameRate: { ideal: 15 },
           },
         });
-      } else if (source.type === StreamType.VIDEO_SCREEN || source.type === StreamType.VIDEO_WINDOW) {
+      } else if (
+        source.type === StreamType.VIDEO_SCREEN ||
+        source.type === StreamType.VIDEO_WINDOW
+      ) {
         stream = await (navigator.mediaDevices as any).getDisplayMedia({
           video: {
             width: { ideal: source.width ?? 1920 },
@@ -94,7 +97,7 @@ export class LiveKitVideoAdapter implements IVideoInputPort {
   async stopCapture(handle: StreamHandle): Promise<void> {
     const stream = this.activeStreams.get(handle.id);
     if (stream) {
-      stream.getTracks().forEach(t => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
       this.activeStreams.delete(handle.id);
     }
     if (this.captureInterval) {
@@ -111,8 +114,8 @@ export class LiveKitVideoAdapter implements IVideoInputPort {
   async getAvailableSources(): Promise<VideoSource[]> {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices
-      .filter(d => d.kind === 'videoinput')
-      .map(d => ({
+      .filter((d) => d.kind === 'videoinput')
+      .map((d) => ({
         id: d.deviceId,
         type: StreamType.VIDEO_CAMERA as const,
         name: d.label || `Camera ${d.deviceId.slice(0, 8)}`,

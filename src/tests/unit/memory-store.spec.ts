@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { MemoryStore, type MemoryEntry } from '@application/services/memory/memory-store';
+import { type MemoryEntry, MemoryStore } from '@application/services/memory/memory-store';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('MemoryStore', () => {
   let store: MemoryStore;
@@ -28,7 +28,11 @@ describe('MemoryStore', () => {
   });
 
   it('should search by keyword', async () => {
-    await store.save(makeEntry('solid_principles', { content: 'SOLID stands for Single Responsibility, Open/Closed...' }));
+    await store.save(
+      makeEntry('solid_principles', {
+        content: 'SOLID stands for Single Responsibility, Open/Closed...',
+      }),
+    );
     await store.save(makeEntry('react_hooks', { content: 'useState, useEffect, useCallback...' }));
 
     const results = await store.search('SOLID');

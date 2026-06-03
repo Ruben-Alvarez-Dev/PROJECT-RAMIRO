@@ -1,18 +1,16 @@
 // src/infrastructure/adapters/tts/gemini-tts.adapter.ts
 // Google Gemini TTS fallback — streaming synthesis
 
-import type { ITTSPort } from '@core/ports/output/tts.port';
 import type { AudioBuffer, VoiceConfig, VoiceInfo } from '@core/domain/types';
-import { Logger } from '@shared/logging/logger';
+import type { ITTSPort } from '@core/ports/output/tts.port';
 import { AdapterError } from '@shared/errors/domain.error';
+import { Logger } from '@shared/logging/logger';
 
 export class GeminiTTSAdapter implements ITTSPort {
   private readonly logger = new Logger('GeminiTTS');
-  private currentVoice: string = 'Aoede';
+  private currentVoice = 'Aoede';
 
-  constructor(
-    private readonly apiKey: string,
-  ) {}
+  constructor(private readonly apiKey: string) {}
 
   async *synthesize(text: string, voice?: VoiceConfig): AsyncIterable<AudioBuffer> {
     const voiceId = voice?.voiceId ?? this.currentVoice;
@@ -40,13 +38,15 @@ export class GeminiTTSAdapter implements ITTSPort {
       throw new AdapterError(`Gemini TTS error: ${response.status}`, 'gemini-tts');
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       candidates: Array<{
         content: { parts: Array<{ inlineData: { mimeType: string; data: string } }> };
       }>;
     };
 
-    const audioPart = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.mimeType?.startsWith('audio/'));
+    const audioPart = data.candidates?.[0]?.content?.parts?.find((p) =>
+      p.inlineData?.mimeType?.startsWith('audio/'),
+    );
     if (!audioPart?.inlineData) {
       throw new AdapterError('No audio data in Gemini TTS response', 'gemini-tts');
     }

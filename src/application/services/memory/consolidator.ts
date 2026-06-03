@@ -3,10 +3,10 @@
 // Pattern from Claude Code (clawspring/memory/consolidator.py).
 // Hard cap: 3 memories per session to avoid noise.
 
-import type { ILLMPort } from '@core/ports/output/llm.port';
 import type { LLMMessage } from '@core/domain/types';
-import type { MemoryEntry } from './memory-store';
+import type { ILLMPort } from '@core/ports/output/llm.port';
 import { Logger } from '@shared/logging/logger';
+import type { MemoryEntry } from './memory-store';
 
 export interface ConsolidationResult {
   readonly memoriesSaved: number;
@@ -79,18 +79,21 @@ export class MemoryConsolidator {
       }
 
       // Parse JSON response
-      const parsed = JSON.parse(resultText) as { memories: Array<{
-        name: string;
-        type: string;
-        description: string;
-        content: string;
-        confidence: number;
-      }> };
+      const parsed = JSON.parse(resultText) as {
+        memories: Array<{
+          name: string;
+          type: string;
+          description: string;
+          content: string;
+          confidence: number;
+        }>;
+      };
 
       const memories: MemoryEntry[] = [];
       const now = new Date().toISOString();
 
-      for (const m of (parsed.memories ?? []).slice(0, 3)) { // hard cap: 3
+      for (const m of (parsed.memories ?? []).slice(0, 3)) {
+        // hard cap: 3
         if (!m.name || !m.type || !m.description || !m.content) continue;
 
         memories.push({
@@ -109,7 +112,10 @@ export class MemoryConsolidator {
 
       return { memoriesSaved: memories.length, memories, skipped: false };
     } catch (error) {
-      this.logger.error('Consolidation failed', error instanceof Error ? error : new Error(String(error)));
+      this.logger.error(
+        'Consolidation failed',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       return { memoriesSaved: 0, memories: [], skipped: true, reason: 'LLM error' };
     }
   }

@@ -1,9 +1,9 @@
 // src/application/use-cases/knowledge/query-knowledge.ts
 
+import type { TierLevel } from '@core/domain/enums';
+import type { SearchResult } from '@core/domain/types';
 import type { IKnowledgePort } from '@core/ports/input/knowledge.port';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { SearchResult } from '@core/domain/types';
-import { TierLevel } from '@core/domain/enums';
 
 export interface QueryKnowledgeInput {
   readonly query: string;
@@ -27,11 +27,7 @@ export class QueryKnowledge {
   async execute(input: QueryKnowledgeInput): Promise<QueryKnowledgeOutput> {
     const start = Date.now();
 
-    const results = await this.knowledge.search(
-      input.query,
-      input.tier,
-      input.limit ?? 10,
-    );
+    const results = await this.knowledge.search(input.query, input.tier, input.limit ?? 10);
 
     const queryTimeMs = Date.now() - start;
 

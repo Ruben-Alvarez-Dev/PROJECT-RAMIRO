@@ -4,11 +4,11 @@
 // PRO: deep analysis, structured reasoning, long-form output.
 // Both models receive the same multimodal input and their responses are merged.
 
-import type { ILLMPort } from '@core/ports/output/llm.port';
+import type { LLMMessage } from '@core/domain/types';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
-import type { LLMMessage, LLMChunk, ModelConfig } from '@core/domain/types';
-import type { SampledFrame } from './frame-sampler';
+import type { ILLMPort } from '@core/ports/output/llm.port';
 import { Logger } from '@shared/logging/logger';
+import type { SampledFrame } from './frame-sampler';
 
 export interface DualProcessResult {
   readonly omniResponse: string;
@@ -35,7 +35,11 @@ export class DualModelProcessor {
   private readonly logger = new Logger('DualModelProcessor');
   private config: DualProcessorConfig;
   private processing = false;
-  private processQueue: Array<{ frames: SampledFrame[]; textContext?: string; resolve: (r: DualProcessResult) => void }> = [];
+  private processQueue: Array<{
+    frames: SampledFrame[];
+    textContext?: string;
+    resolve: (r: DualProcessResult) => void;
+  }> = [];
 
   constructor(
     private readonly omni: ILLMPort,
@@ -146,7 +150,10 @@ export class DualModelProcessor {
 
     // TIER 0 sacred context
     if (this.config.tier0Context) {
-      messages.push({ role: 'system', content: `[TIER 0 — Sacred Word]\n${this.config.tier0Context}` });
+      messages.push({
+        role: 'system',
+        content: `[TIER 0 — Sacred Word]\n${this.config.tier0Context}`,
+      });
     }
 
     // Conversation history (last 5 turns)
@@ -167,7 +174,7 @@ export class DualModelProcessor {
     messages.push({
       role: 'user',
       content: frameDescription,
-      images: frames.map(f => `data:image/jpeg;base64,${f.jpegData}`),
+      images: frames.map((f) => `data:image/jpeg;base64,${f.jpegData}`),
     });
 
     return messages;
