@@ -73,7 +73,16 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
         <div
           key={source.id}
           className={`ramiro-video-grid__cell ${focusedSourceId === source.id ? 'ramiro-video-grid__cell--focused' : ''}`}
+          // biome-ignore lint/a11y/useSemanticElements: the cell wraps nested interactive elements (video, remove button), so a native <button> would be invalid
+          role="button"
+          tabIndex={0}
           onClick={() => onSourceClick?.(source.id)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onSourceClick?.(source.id);
+            }
+          }}
         >
           <video ref={(el) => setVideoRef(source.id, el)} autoPlay muted playsInline />
           <span className="ramiro-video-grid__fps">{fps}fps</span>
@@ -85,6 +94,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
           </span>
           {onSourceRemove && (
             <button
+              type="button"
               className="ramiro-video-grid__remove"
               onClick={(e) => {
                 e.stopPropagation();
@@ -101,7 +111,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
         </div>
       ))}
       {sources.length < maxSources && onAddSource && (
-        <button className="ramiro-video-grid__add" onClick={onAddSource}>
+        <button type="button" className="ramiro-video-grid__add" onClick={onAddSource}>
           + Add source ({sources.length}/{maxSources})
         </button>
       )}

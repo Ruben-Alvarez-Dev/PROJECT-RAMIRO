@@ -50,6 +50,7 @@ export const AudioWaveform: React.FC<AudioWaveformProps> = ({
       <div className="ramiro-waveform__bars">
         {heights.map((h, i) => (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: bars are a fixed positional visualisation, never reordered
             key={i}
             className={`ramiro-waveform__bar ${isActive ? 'ramiro-waveform__bar--active' : ''}`}
             style={{ height: `${h}px` }}

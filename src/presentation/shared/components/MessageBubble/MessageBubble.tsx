@@ -28,6 +28,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, className
       <div className="ramiro-message__content">
         <div className="ramiro-message__text">
           {message.content.split('\n').map((line, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional within a static message
             <p key={i}>{line}</p>
           ))}
         </div>

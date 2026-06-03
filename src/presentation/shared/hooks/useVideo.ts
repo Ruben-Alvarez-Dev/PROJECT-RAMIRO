@@ -53,7 +53,7 @@ export function useVideo(): UseVideoReturn {
   const startScreen = useCallback(async () => {
     try {
       setError(null);
-      const stream = await (navigator.mediaDevices as any).getDisplayMedia({
+      const stream = await navigator.mediaDevices.getDisplayMedia({
         video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 15 } },
         audio: false,
       });
@@ -66,8 +66,8 @@ export function useVideo(): UseVideoReturn {
   const startWindow = useCallback(async () => {
     try {
       setError(null);
-      const stream = await (navigator.mediaDevices as any).getDisplayMedia({
-        video: { displaySurface: 'window' } as any,
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: 'window' } as MediaTrackConstraints,
         audio: false,
       });
       addSource('window', stream, 'Window');
@@ -80,7 +80,7 @@ export function useVideo(): UseVideoReturn {
     (id: string) => {
       const stream = streamsRef.current.get(id);
       if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
+        for (const t of stream.getTracks()) t.stop();
         streamsRef.current.delete(id);
       }
       setSources((prev) => {
@@ -97,7 +97,7 @@ export function useVideo(): UseVideoReturn {
 
   const stopAll = useCallback(() => {
     for (const [, stream] of streamsRef.current) {
-      stream.getTracks().forEach((t) => t.stop());
+      for (const t of stream.getTracks()) t.stop();
     }
     streamsRef.current.clear();
     setSources([]);

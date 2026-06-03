@@ -54,6 +54,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         {isSessionActive ? (
           <>
             <button
+              type="button"
               className={`ramiro-control-bar__mic-button ramiro-control-bar__mic-button--${pipelineState.status === 'listening' ? 'active' : 'idle'}`}
               onClick={onMicToggle}
               title={pipelineState.status === 'listening' ? 'Stop talking' : 'Start talking'}

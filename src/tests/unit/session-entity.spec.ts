@@ -80,22 +80,25 @@ describe('Session Entity', () => {
   });
 
   it('should support multiple sources up to 4', () => {
-    const sources = Array.from({ length: 4 }, (_, i): StreamSource => ({
-      id: `source-${i}`,
-      type: i % 2 === 0 ? StreamType.VIDEO_CAMERA : StreamType.AUDIO_INPUT,
-      name: `Source ${i}`,
-      config: {
-        sampleRate: 24000,
-        channels: 1,
-        bitDepth: 16,
-        codec: 'opus' as const,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-      status: StreamStatus.ACTIVE,
-      priority: i + 1,
-    }));
+    const sources = Array.from(
+      { length: 4 },
+      (_, i): StreamSource => ({
+        id: `source-${i}`,
+        type: i % 2 === 0 ? StreamType.VIDEO_CAMERA : StreamType.AUDIO_INPUT,
+        name: `Source ${i}`,
+        config: {
+          sampleRate: 24000,
+          channels: 1,
+          bitDepth: 16,
+          codec: 'opus' as const,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+        status: StreamStatus.ACTIVE,
+        priority: i + 1,
+      }),
+    );
 
     const session = createSession({ sources });
     expect(session.sources).toHaveLength(4);

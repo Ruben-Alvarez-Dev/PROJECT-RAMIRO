@@ -3,7 +3,6 @@ import type { ILLMPort } from '@core/ports/output/llm.port';
 import { AdapterError } from '@shared/errors/domain.error';
 
 export class QwenAdapter implements ILLMPort {
-
   constructor(
     private readonly apiKey: string,
     private readonly baseUrl: string = 'https://dashscope.aliyuncs.com/compatible-mode/v1',

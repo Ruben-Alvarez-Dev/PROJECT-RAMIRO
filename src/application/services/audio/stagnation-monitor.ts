@@ -43,7 +43,7 @@ export class StagnationMonitor {
       return {
         isStagnant: true,
         reason: 'repeated_question',
-        intervention: `User asked the same question again. Cached response available.`,
+        intervention: 'User asked the same question again. Cached response available.',
         action: 'cache_hit',
       };
     }

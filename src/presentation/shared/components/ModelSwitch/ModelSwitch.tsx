@@ -42,6 +42,7 @@ export const ModelSwitch: React.FC<ModelSwitchProps> = ({
         <React.Fragment key={option.value}>
           {index > 0 && <div className="ramiro-model-switch__separator" />}
           <button
+            type="button"
             className={`ramiro-model-switch__option ${value === option.value ? 'ramiro-model-switch__option--active' : ''}`}
             onClick={() => !disabled && onChange(option.value)}
             disabled={disabled}

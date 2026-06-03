@@ -99,7 +99,7 @@ export class FrameSampler {
     if (!source) return;
 
     if (source.intervalId) clearInterval(source.intervalId);
-    source.stream?.getTracks().forEach((t) => t.stop());
+    for (const t of source.stream?.getTracks() ?? []) t.stop();
     source.videoElement?.remove();
     if (source.canvas) this.canvasPool.push(source.canvas);
     this.sources.delete(sourceId);

@@ -1,5 +1,6 @@
 import { DualModelProcessor } from '@application/services/video/dual-model-processor';
-import type { LLMChunk, LLMRequest } from '@core/domain/types';
+import type { SampledFrame } from '@application/services/video/frame-sampler';
+import type { LLMChunk, LLMMessage, LLMRequest } from '@core/domain/types';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
 import type { ILLMPort } from '@core/ports/output/llm.port';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -17,9 +18,11 @@ const createMockAdapter = (response: string): ILLMPort => ({
 });
 
 const createFailingAdapter = (): ILLMPort => ({
+  // biome-ignore lint/correctness/useYield: mock throws to simulate adapter failure
   chat: async function* () {
     throw new Error('API down');
   },
+  // biome-ignore lint/correctness/useYield: mock throws to simulate adapter failure
   chatMultimodal: async function* () {
     throw new Error('API down');
   },
@@ -33,7 +36,7 @@ const mockEventBus: IEventBus = {
   off: vi.fn(),
 };
 
-const createMockFrame = (sourceId: string): any => ({
+const createMockFrame = (sourceId: string): SampledFrame => ({
   sourceId,
   timestamp: Date.now(),
   jpegData: 'base64data',
@@ -163,7 +166,7 @@ describe('DualModelProcessor', () => {
   });
 
   it('should include tier0 context in messages', async () => {
-    const capturedMessages: any[] = [];
+    const capturedMessages: LLMMessage[] = [];
     const captureAdapter: ILLMPort = {
       chat: async function* (req: LLMRequest) {
         capturedMessages.push(...req.messages);
@@ -181,10 +184,10 @@ describe('DualModelProcessor', () => {
 
     await processor.process([createMockFrame('cam')]);
 
-    const systemMsgs = capturedMessages.filter((m: any) => m.role === 'system');
+    const systemMsgs = capturedMessages.filter((m) => m.role === 'system');
     expect(systemMsgs.length).toBeGreaterThanOrEqual(2);
-    expect(systemMsgs.some((m: any) => m.content === 'You are Ramiro.')).toBe(true);
-    expect(systemMsgs.some((m: any) => m.content.includes('TIER 0'))).toBe(true);
+    expect(systemMsgs.some((m) => m.content === 'You are Ramiro.')).toBe(true);
+    expect(systemMsgs.some((m) => m.content.includes('TIER 0'))).toBe(true);
   });
 
   it('should track processing state correctly', async () => {

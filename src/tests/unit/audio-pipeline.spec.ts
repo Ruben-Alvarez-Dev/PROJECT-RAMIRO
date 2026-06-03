@@ -161,7 +161,7 @@ describe('AudioPipelineService', () => {
   });
 
   it('should skip processing low-confidence transcripts', async () => {
-    (mockSTT.transcribe as any).mockResolvedValueOnce({
+    vi.mocked(mockSTT.transcribe).mockResolvedValueOnce({
       text: '',
       confidence: 0.1,
       language: 'es',
@@ -180,7 +180,7 @@ describe('AudioPipelineService', () => {
   });
 
   it('should handle pipeline errors gracefully', async () => {
-    (mockSTT.transcribe as any).mockRejectedValueOnce(new Error('STT service unavailable'));
+    vi.mocked(mockSTT.transcribe).mockRejectedValueOnce(new Error('STT service unavailable'));
 
     await pipeline.start({ mode: 'push-to-talk' });
     pipeline.startTalking();

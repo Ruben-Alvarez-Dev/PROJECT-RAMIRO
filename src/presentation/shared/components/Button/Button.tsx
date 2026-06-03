@@ -11,6 +11,7 @@ export interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -22,6 +23,7 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   className = '',
   title,
+  type = 'button',
 }) => {
   const classNames = [
     'ramiro-button',
@@ -34,7 +36,13 @@ export const Button: React.FC<ButtonProps> = ({
     .join(' ');
 
   return (
-    <button className={classNames} disabled={disabled || loading} onClick={onClick} title={title}>
+    <button
+      type={type}
+      className={classNames}
+      disabled={disabled || loading}
+      onClick={onClick}
+      title={title}
+    >
       {loading && <span className="ramiro-button__spinner" />}
       {children}
     </button>

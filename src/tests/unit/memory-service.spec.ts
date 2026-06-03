@@ -167,7 +167,7 @@ describe('MemoryService', () => {
         updatedAt: new Date(),
       },
     ];
-    (mockStorage.recallMemory as any).mockResolvedValueOnce(memories);
+    vi.mocked(mockStorage.recallMemory).mockResolvedValueOnce(memories);
 
     const result = await service.recallMemory('SOLID');
 

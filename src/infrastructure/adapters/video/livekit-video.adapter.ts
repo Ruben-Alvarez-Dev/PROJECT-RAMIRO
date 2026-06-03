@@ -32,7 +32,7 @@ export class LiveKitVideoAdapter implements IVideoInputPort {
         source.type === StreamType.VIDEO_SCREEN ||
         source.type === StreamType.VIDEO_WINDOW
       ) {
-        stream = await (navigator.mediaDevices as any).getDisplayMedia({
+        stream = await navigator.mediaDevices.getDisplayMedia({
           video: {
             width: { ideal: source.width ?? 1920 },
             height: { ideal: source.height ?? 1080 },
@@ -97,7 +97,7 @@ export class LiveKitVideoAdapter implements IVideoInputPort {
   async stopCapture(handle: StreamHandle): Promise<void> {
     const stream = this.activeStreams.get(handle.id);
     if (stream) {
-      stream.getTracks().forEach((t) => t.stop());
+      for (const t of stream.getTracks()) t.stop();
       this.activeStreams.delete(handle.id);
     }
     if (this.captureInterval) {

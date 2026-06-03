@@ -10,17 +10,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 describe('ContextManager', () => {
   const mockKnowledge: IKnowledgePort = {
     indexDocument: vi.fn(),
-    search: vi
-      .fn()
-      .mockResolvedValue([
-        {
-          documentId: 'doc-1',
-          title: 'Test Doc',
-          chunk: 'Test content',
-          score: 0.9,
-          tier: TierLevel.CORE,
-        },
-      ]),
+    search: vi.fn().mockResolvedValue([
+      {
+        documentId: 'doc-1',
+        title: 'Test Doc',
+        chunk: 'Test content',
+        score: 0.9,
+        tier: TierLevel.CORE,
+      },
+    ]),
     getDocument: vi.fn(),
     deleteDocument: vi.fn(),
     getTierConfig: vi.fn(),
@@ -34,7 +32,7 @@ describe('ContextManager', () => {
   });
 
   it('should assemble context with TIER 0 when paths are configured', async () => {
-    (mockKnowledge.search as any).mockResolvedValueOnce([
+    vi.mocked(mockKnowledge.search).mockResolvedValueOnce([
       {
         documentId: 'tier0-doc',
         title: 'Sacred Doc',

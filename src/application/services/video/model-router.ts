@@ -1,4 +1,3 @@
-
 export type ModelMode = 'auto' | 'omni' | 'pro' | 'both';
 
 export type RouteDecision = 'omni_only' | 'pro_only' | 'both_parallel';
@@ -18,7 +17,6 @@ export interface RoutingResult {
   readonly omniPrompt: string;
   readonly proPrompt: string;
 }
-
 
 export function decideRoute(ctx: RoutingContext): RoutingResult {
   // User override: explicit mode wins always

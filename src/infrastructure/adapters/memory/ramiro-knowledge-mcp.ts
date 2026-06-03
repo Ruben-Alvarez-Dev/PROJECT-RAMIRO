@@ -107,13 +107,13 @@ export class RamiroKnowledgeMCP {
     const index = await this.memoryStore.list();
 
     const status = [
-      `=== Ramiro Context Status ===`,
+      '=== Ramiro Context Status ===',
       `Total memories: ${index.totalEntries}`,
       `Current topic: ${anchor?.subTopic ?? 'none'}`,
       `Topic confidence: ${anchor?.confidence?.toFixed(2) ?? 'n/a'}`,
       `Topic messages: ${anchor?.messageCount ?? 0}`,
-      ``,
-      `=== Memory Index ===`,
+      '',
+      '=== Memory Index ===',
       index.entries
         .slice(0, 10)
         .map((e) => `- ${e.name}: ${e.description}`)

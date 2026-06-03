@@ -99,6 +99,6 @@ export class ContextManager {
     // Approximate: 1 token ≈ 4 chars for English, ~2 chars for CJK
     const approxChars = maxTokens * 4;
     if (text.length <= approxChars) return text;
-    return text.substring(0, approxChars) + '\n[...truncated]';
+    return `${text.substring(0, approxChars)}\n[...truncated]`;
   }
 }

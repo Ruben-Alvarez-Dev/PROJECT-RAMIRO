@@ -1,5 +1,6 @@
 // src/application/use-cases/video/stop-video-stream.ts
 
+import type { StreamHandle } from '@core/domain/types';
 import type { IVideoInputPort } from '@core/ports/input/video-input.port';
 import type { IEventBus } from '@core/ports/notification/event-bus.port';
 
@@ -23,7 +24,8 @@ export class StopVideoStream {
   async execute(input: StopVideoStreamInput): Promise<StopVideoStreamOutput> {
     try {
       for (const handleId of input.handles) {
-        await this.videoInput.stopCapture({ id: handleId } as any);
+        // stopCapture only reads handle.id; the use-case tracks ids, not full handles.
+        await this.videoInput.stopCapture({ id: handleId } as unknown as StreamHandle);
       }
 
       this.eventBus.emit({

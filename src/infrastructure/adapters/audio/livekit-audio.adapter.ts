@@ -76,7 +76,7 @@ export class LiveKitAudioAdapter implements IAudioInputPort {
   async stopCapture(handle: StreamHandle): Promise<void> {
     const stream = this.activeStreams.get(handle.id);
     if (stream) {
-      stream.getTracks().forEach((t) => t.stop());
+      for (const t of stream.getTracks()) t.stop();
       this.activeStreams.delete(handle.id);
     }
     if (this.processor) {

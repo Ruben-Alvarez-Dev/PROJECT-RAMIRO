@@ -61,9 +61,11 @@ describe('OrchestratorService', () => {
 
   it('should fall back when primary adapter throws', async () => {
     const failingAdapter: ILLMPort = {
+      // biome-ignore lint/correctness/useYield: mock throws to simulate adapter failure
       chat: async function* () {
         throw new Error('API down');
       },
+      // biome-ignore lint/correctness/useYield: mock throws to simulate adapter failure
       chatMultimodal: async function* () {
         throw new Error('API down');
       },

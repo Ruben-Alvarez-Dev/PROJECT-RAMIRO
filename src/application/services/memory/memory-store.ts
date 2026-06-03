@@ -23,12 +23,11 @@ export interface MemoryIndex {
   scope: string;
 }
 
-// In-memory implementation (Tauri/SQLite bridge replaces later)
+// In-memory implementation (Tauri/SQLite bridge replaces later).
+// User/project memory directories will be added to the constructor once the
+// file backend lands.
 export class MemoryStore {
   private entries = new Map<string, MemoryEntry>();
-
-  // Directory params are reserved for the future Tauri/SQLite file backend.
-  constructor(_userDir = '~/.ramiro/memory', _projectDir = '.ramiro/memory') {}
 
   async save(entry: MemoryEntry): Promise<void> {
     const key = this.makeKey(entry.name, entry.scope);
