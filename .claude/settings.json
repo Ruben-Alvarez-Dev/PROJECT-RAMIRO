@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun install --frozen-lockfile 2>/dev/null || bun install"
+          }
+        ]
+      }
+    ]
+  }
+}

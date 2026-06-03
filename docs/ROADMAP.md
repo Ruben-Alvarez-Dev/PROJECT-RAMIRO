@@ -1,6 +1,27 @@
 # Roadmap
 
-**Last updated:** 2026-04-30
+**Last updated:** 2026-06-03
+
+---
+
+## ⚠️ Recovery Pass — 2026-06-03
+
+The phases below were marked ✅ complete, but a verification pass found the
+toolchain had never actually been run: **build, typecheck, the full test suite
+and lint all failed**. A 4-wave recovery restored a verifiable green baseline:
+
+| Gate | Before | After |
+|------|--------|-------|
+| `biome check` (lint) | 197 errors | **0 errors** (41 non-blocking warnings) |
+| `tsc --noEmit` (typecheck) | 52 errors | **0** |
+| `vitest run` (tests) | 9/12 suites failing | **12/12, 74/74 tests** |
+| `vite build` (build) | broken | **OK** |
+| CI (`vitest --coverage`) | missing dep | **OK, 87% coverage** |
+
+Notable correctness bug fixed: the orchestrator's model failover never triggered
+(a missing `await` let the rejected promise escape its `try/catch`). Remaining
+deferred debt is tracked in [`ARCHITECTURE-DEBT.md`](./ARCHITECTURE-DEBT.md).
+Run `bash scripts/verify.sh` before pushing.
 
 ---
 
