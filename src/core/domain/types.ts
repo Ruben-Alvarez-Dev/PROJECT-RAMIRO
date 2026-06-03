@@ -38,8 +38,11 @@ export interface AudioDevice {
 }
 
 // ─── Video ───
+// NOTE: VideoFrame carries frame *metadata* only. The raw pixel payload is a
+// presentation/infrastructure concern (canvas, MediaStream) and must not leak
+// DOM types into the domain. When pixels need to cross a boundary, encode them
+// into a domain-neutral ImageBuffer (Uint8Array) instead.
 export interface VideoFrame {
-  readonly data: ImageData | HTMLCanvasElement | HTMLVideoElement;
   readonly width: number;
   readonly height: number;
   readonly timestamp: number;

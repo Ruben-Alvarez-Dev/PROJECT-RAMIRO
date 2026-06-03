@@ -68,7 +68,6 @@ export class LiveKitVideoAdapter implements IVideoInputPort {
         if (this.ctx && this.canvas) {
           this.ctx.drawImage(videoEl, 0, 0, this.canvas.width, this.canvas.height);
           const frame: VideoFrame = {
-            data: this.canvas,
             width: this.canvas.width,
             height: this.canvas.height,
             timestamp: performance.now(),
